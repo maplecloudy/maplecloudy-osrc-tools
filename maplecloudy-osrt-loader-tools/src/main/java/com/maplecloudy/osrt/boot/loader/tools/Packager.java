@@ -24,14 +24,13 @@ import com.maplecloudy.osrt.boot.loader.tools.AbstractJarWriter.EntryTransformer
 import com.maplecloudy.osrt.boot.loader.tools.AbstractJarWriter.UnpackHandler;
 import com.maplecloudy.osrt.boot.loader.tools.MainClassFinder.MainClass;
 import com.maplecloudy.osrt.model.app.*;
-import com.maplecloudy.osrt.model.common.Repository;
 import com.maplecloudy.osrt.model.maven.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -262,12 +261,12 @@ public abstract class Packager {
     ObjectMapper om = new ObjectMapper();
     om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    if (CollectionUtils.isNotEmpty(project.getDevelopers())) {
+    if (!CollectionUtils.isEmpty(project.getDevelopers())) {
       runAbleApp.developers = om.convertValue(project.getDevelopers(),
           new TypeReference<List<Developer>>() {
           });
     }
-    if (CollectionUtils.isNotEmpty(project.getMailingLists())) {
+    if (!CollectionUtils.isEmpty(project.getMailingLists())) {
       runAbleApp.mailingLists = om.convertValue(project.getMailingLists(),
           new TypeReference<List<MailingList>>() {
           });
@@ -286,16 +285,16 @@ public abstract class Packager {
       runAbleApp.url = project.getUrl();
     }
     if (artifact.getRepository() != null) {
-      runAbleApp.repository = new Repository();
+      runAbleApp.repository = new com.maplecloudy.osrt.model.repository.Repository();
       runAbleApp.repository.url = artifact.getRepository().getUrl();
     }
-    if (CollectionUtils.isNotEmpty(project.getLicenses())) {
+    if (!CollectionUtils.isEmpty(project.getLicenses())) {
       runAbleApp.licenses = om.convertValue(project.getLicenses(),
           new TypeReference<List<License>>() {
           });
 
     }
-    if (CollectionUtils.isNotEmpty(project.getContributors())) {
+    if (!CollectionUtils.isEmpty(project.getContributors())) {
       runAbleApp.contributors = om.convertValue(project.getContributors(),
           new TypeReference<List<Contributor>>() {
           });
@@ -429,13 +428,13 @@ public abstract class Packager {
           podEntries.add(podEntry);
         }
       }
-      if (!ObjectUtils.isEmpty(podEntries)){
+      if (!ObjectUtils.isEmpty(podEntries)) {
         List<PodEntry> taskEntries = podEntries.stream()
             .filter(podEntry -> podEntry.appPodType == AppPodType.TASK)
             .collect(Collectors.toList());
         if (!ObjectUtils.isEmpty(taskEntries)) {
-          manifest.getMainAttributes()
-              .putValue(TASK_CLASS_ATTRIBUTE,StringUtils.collectionToDelimitedString(taskEntries, ","));
+          manifest.getMainAttributes().putValue(TASK_CLASS_ATTRIBUTE,
+              StringUtils.collectionToDelimitedString(taskEntries, ","));
         }
       }
       runAbleApp.podEntries = podEntries;
@@ -448,7 +447,7 @@ public abstract class Packager {
   private Set<MainClass> getMainClass(JarFile source, Manifest manifest)
       throws IOException {
 
-    if (CollectionUtils.isNotEmpty(mainClass)) {
+    if (!CollectionUtils.isEmpty(mainClass)) {
       return this.mainClass;
     }
     // TODO: 考虑用户源码中自定义manifest的问题
