@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.9.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.maplecloudy.com</groupId>
+    <artifactId>maplecloudy-osrt-maven</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+
+    <packaging>pom</packaging>
+    <name>maplecloudy-osrt-maven</name>
+    <description>Mapleccloudy OSRT</description>
+
+    <modules>
+        <module>maplecloudy-osrt-loader</module>
+        <module>maplecloudy-osrt-jarmode-layertools</module>
+        <module>maplecloudy-osrt-loader-tools</module>
+        <module>maplecloudy-osrt-maven-plugin</module>
+    </modules>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.maplecloudy.osrt</groupId>
+                <artifactId>maplecloudy-osrt-model-public</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.maplecloudy.platform</groupId>
+                    <artifactId>maplecloudy-platform-maven-plugin</artifactId>
+                    <version>2.0.0-CDH6.0.0-SNAPSHOT</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
