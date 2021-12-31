@@ -207,4 +207,16 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>maven-public</name>
+            <url>http://nexus.osrt.com:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>releases</id>
+            <name>maven-public</name>
+            <url>http://nexus.osrt.com:8081/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 </project>

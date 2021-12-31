@@ -1,5 +1,0 @@
-# type=springboot
-DIR="$( cd -P "$( dirname "$0"  )" && pwd  )"
-cd $DIR
-cd ..
-java $JVM_OPS -jar lib/%s
