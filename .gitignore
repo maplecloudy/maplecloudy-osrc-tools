@@ -16,9 +16,9 @@
 .idea/**
 **.iml
 **/.factorypath
-yarn.lock
+**/yarn.lock
 **/src/main/java/com/maplecloudy/platform/utils/FsInput.java
-node_modules/**
+**/node_modules/**
 yarn.lock
 **/derby.log
 **/src/main/resources/front/
