@@ -17,4 +17,4 @@
 /**
  * JarMode support for layertools.
  */
-package org.springframework.boot.jarmode.layertools;
+package com.maplecloudy.osrt.boot.jarmode.layertools;

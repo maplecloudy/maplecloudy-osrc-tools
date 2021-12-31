@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.jarmode.layertools;
+package com.maplecloudy.osrt.boot.jarmode.layertools;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -44,7 +44,7 @@ class HelpCommand extends Command {
 	}
 
 	void run(PrintStream out, Map<Option, String> options, List<String> parameters) {
-		Command command = (!parameters.isEmpty()) ? Command.find(this.commands, parameters.get(0)) : null;
+		Command command = (!parameters.isEmpty()) ? find(this.commands, parameters.get(0)) : null;
 		if (command != null) {
 			printCommandHelp(out, command);
 			return;

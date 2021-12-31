@@ -1,2 +1,2 @@
 org.springframework.boot.loader.jarmode.JarMode=\
-org.springframework.boot.jarmode.layertools.LayerToolsJarMode
+com.maplecloudy.osrt.boot.jarmode.layertools.LayerToolsJarMode

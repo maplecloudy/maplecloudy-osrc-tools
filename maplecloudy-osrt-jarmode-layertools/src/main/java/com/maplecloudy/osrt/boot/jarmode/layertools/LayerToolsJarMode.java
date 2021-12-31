@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.jarmode.layertools;
+package com.maplecloudy.osrt.boot.jarmode.layertools;
 
 import com.maplecloudy.osrt.boot.loader.jarmode.JarMode;
 
