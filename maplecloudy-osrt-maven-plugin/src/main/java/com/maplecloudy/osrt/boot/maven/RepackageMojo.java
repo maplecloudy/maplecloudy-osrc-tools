@@ -71,7 +71,7 @@ public class RepackageMojo extends AbstractPackagerMojo {
 	 * Name of the generated archive.
 	 * @since 1.0.0
 	 */
-	@Parameter(defaultValue = "${project.build.finalName}-osrt-app", readonly =
+	@Parameter(defaultValue = "${project.build.finalName}-osrc-app", readonly =
 			true)
 	private String finalName;
 

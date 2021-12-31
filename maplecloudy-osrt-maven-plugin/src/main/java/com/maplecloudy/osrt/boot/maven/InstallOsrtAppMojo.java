@@ -78,7 +78,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
   @Parameter(defaultValue = "${reactorProjects}", required = true, readonly = true)
   private List<MavenProject> reactorProjects;
   
-  @Parameter(defaultValue = "${project.build.finalName}", readonly = true)
+  @Parameter(defaultValue = "${project.build.finalName}-osrc-app", readonly = true)
   private String finalName;
   
   @Parameter

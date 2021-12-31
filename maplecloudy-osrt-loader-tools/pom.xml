@@ -14,7 +14,6 @@
     <description>Maplecloudy Osrt Loader tools</description>
     <properties>
         <main.basedir>${basedir}/../../..</main.basedir>
-        <maven.version>3.3.9</maven.version>
     </properties>
     <dependencies>
         <dependency>
