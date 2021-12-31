@@ -19,6 +19,7 @@
 **/yarn.lock
 **/src/main/java/com/maplecloudy/platform/utils/FsInput.java
 **/node_modules/**
+**/package-lock.json
 yarn.lock
 **/derby.log
 **/src/main/resources/front/
