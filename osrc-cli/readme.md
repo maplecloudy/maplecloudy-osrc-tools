@@ -8,7 +8,7 @@
 `DEBUG=* nodejs scripts/mcli/mcli.mjs login`
 
 ## 配置远程服务地址
-
+this is for devleper, the default is https://www.osrc.com/, you can ignore this cmd!
 ```bash
 osrc-cli -r https://www.osrc.com/
 osrc-cli --remote https://www.osrc.com/
@@ -22,12 +22,12 @@ osrc-cli login
 ``` 
 
 ## 打包发布
-
+the deploy dir defalut as 'dist', if your project build output as 'dist',you can ignore this para!
 ```bash
 # 本地开发构建完成后
 # 指定发布目录
-osrc-cli upload -d dist
-osrc-cli upload --dirname dist
+osrc-cli deploy -d dist
+osrc-cli deploy --dirname dist
 # 检索package.json中name/version等必要信息
 # 将dirname目录中文件压缩成.tar.gz格式后, 上传到服务器
 ```
