@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import { login } from './utils.mjs';
 import Debug from 'debug';
 
-const debug = Debug('osrc-cli:login');
+const debug = Debug('osrc:login');
 
 commander
   .action(async function () {

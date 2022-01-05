@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "osrc publish tools for frontend project",
   "bin": {
-    "osrc-cli": "src/osrc-cli.mjs"
+    "osrc": "src/osrc-cli.mjs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

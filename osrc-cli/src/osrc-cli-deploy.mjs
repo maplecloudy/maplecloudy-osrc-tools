@@ -12,7 +12,7 @@ import { fileFromPath } from 'formdata-node/file-from-path';
 import { collectInfo, remoteCheck, deployBundle } from './utils.mjs';
 import { formatSize } from './utils.mjs';
 
-const debug = Debug('mcli:deploy');
+const debug = Debug('osrc:deploy');
 
 commander
   .option('-d, --dirname <dirname>', 'dist directory')
