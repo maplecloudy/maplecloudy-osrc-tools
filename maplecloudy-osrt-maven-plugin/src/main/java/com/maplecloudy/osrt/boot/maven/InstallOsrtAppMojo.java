@@ -26,11 +26,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.maplecloudy.osrt.model.app.Config;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -40,6 +43,7 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -159,20 +163,21 @@ public class InstallOsrtAppMojo extends AbstractMojo {
             "Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)");
         String osrtAppSite = System.getenv("OSRT_APP_SITE");
         String osrtAppToken = System.getenv("OSRT_APP_TOKEN");
+        File osrcFile = new File(SystemUtils.getUserHome(), ".osrc");
+        ObjectMapper om = new ObjectMapper();
+        Config config= om.readValue(osrcFile, Config.class);
         if (StringUtils.isBlank(osrtAppSite)) {
-//          osrtAppSite ="http://192.168.8.103:16881/api/apps/install-app";
-          osrtAppSite = "http://www.osrc.com/api/apps/install-app-file";
+          osrtAppSite = config.getRemote()+"/api/apps/install-app-file";
         }
         m = new PostMethod(osrtAppSite);
 //        Header header = new Header("", "multipart/form-data");
 //      Header header = new Header("Content-type","multipart/form-data");
 //      FilePart filePath = new FilePart(target.getName(),target);
         if (StringUtils.isBlank(osrtAppToken)) {
-          osrtAppToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzI3MjIwNjgsInVzZXJfbmFtZSI6ImNwZiIsImF1dGhvcml0aWVzIjpbInVzZXIiXSwianRpIjoiREpMYzdoU0Zsa1BTeWFBeXQtalF6RjkxYWVvIiwiY2xpZW50X2lkIjoibWFwbGVjbG91ZHkiLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXX0.lXuz_KyFp76NTqhA9snmS5e0nWcSqhDQGzlG-42dJ6I3BVqbT1x7UF9BdkQNV1pnzMuFcv8nL-UUcLgzWzazswknb5u0f8olddLiP2yXTq4GMUag-I_hmGoPZfmrg8do9JKEYHztwTu-1hjt8SleolfZlCaQyx3AW2KkW9Huq6QMhZc-8cGWLOMfsI_sLWL8KdOgxfYoWjfTr0DFDolKQgwiVLhG6k5o-ufiZXisdssoTXHZu-VLqnEOxEoM2_Qx42pXn9dnPtkiuVi16nlIjGx_vPQW8hnePtJfqyae19hWEwpjPEXI7ILn-tXKN5Wnq97L599JJUGQbAjDAwgD7w";
+          osrtAppToken = config.getAccessToken();
         }
         getLog().info(osrtAppSite);
         getLog().info(osrtAppToken);
-
         Header header = new Header("Authorization", "Bearer "+osrtAppToken);
         m.addRequestHeader(header);
         targerJar = new JarFile(target);
@@ -203,7 +208,9 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         }
       } finally {
         IOUtils.closeQuietly(targerJar);
-        if (m != null) m.releaseConnection();
+        if (m != null) {
+          m.releaseConnection();
+        }
       }
       
     } catch (IOException e) {
@@ -228,5 +235,4 @@ public class InstallOsrtAppMojo extends AbstractMojo {
   public void setSkip(boolean skip) {
     this.skip = skip;
   }
-  
 }
