@@ -3,7 +3,7 @@ import fse from 'fs-extra';
 import fetch from 'node-fetch';
 import chalk from 'chalk';
 import Debug from 'debug';
-const debug = Debug('osrc-cli:utils');
+const debug = Debug('osrc:utils');
 
 const home = process.env.HOME || process.env.USERPROFILE;
 const filePath = path.join(home, '.osrc');

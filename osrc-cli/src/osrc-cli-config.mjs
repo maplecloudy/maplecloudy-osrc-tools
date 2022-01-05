@@ -3,7 +3,7 @@ import { loadConfig } from './utils.mjs';
 import chalk from 'chalk';
 import Debug from 'debug';
 
-const debug = Debug('mcli:login');
+const debug = Debug('osrc:login');
 
 commander
   .action(async function () {

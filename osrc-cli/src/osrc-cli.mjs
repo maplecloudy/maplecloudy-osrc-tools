@@ -7,7 +7,7 @@ commander
   .usage(`[command]`)
   .description('osrc frontend tools');
 
-commander.option('-r,--remote <remote>', 'config osrc').action(function (args) {
+commander.option('-r,--remote <remote>', 'config osrc deploy target, this is for developer of osrc,defalut is https://www.osrc.com,').action(function (args) {
   if (args.remote) {
     const config = loadConfig();
     config.remote = args.remote;
@@ -17,7 +17,7 @@ commander.option('-r,--remote <remote>', 'config osrc').action(function (args) {
   }
 });
 
-commander.command('info', 'print configs');
+commander.command('config', 'print configs');
 
 commander.command('login', 'login osrc');
 
