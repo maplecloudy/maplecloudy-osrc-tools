@@ -30,7 +30,6 @@ import org.apache.maven.shared.transfer.project.install.ProjectInstallerRequest;
 import org.springframework.util.ObjectUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -178,8 +177,6 @@ public class InstallOsrtAppMojo extends AbstractMojo {
             config = new Config();
             config.setRemote("https://www.osrc.com");
             osrtAppSite = config.getRemote();
-            //getLog().error("wrong configuration for remote!");
-            //return;
           }
         }
         if (StringUtils.isBlank(osrtAppToken)) {
@@ -189,49 +186,11 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           }
         }
         Header header = new Header("Authorization", "Bearer " + osrtAppToken);
+        ;
         if (ObjectUtils.isEmpty(osrtAppToken)) {
-          Scanner sc = new Scanner(System.in);
-          while (true) {
-            getLog().info("try to login (y/n)? ");
-            String yn = sc.nextLine();
-            if ("y".equalsIgnoreCase(yn) || "yes".equalsIgnoreCase(yn)) {
-              getLog().info("please input the username: ");
-              String username = sc.nextLine();
-              getLog().info("please input the password: ");
-              String password = sc.nextLine();
-              m = new PostMethod(osrtAppSite + "/api/accounts/signin");
-              Map<String,String> map = Maps.newHashMap();
-              map.put("username", username);
-              map.put("password", password);
-              String userInfoStr = om.writeValueAsString(map);
-              RequestEntity entity = new StringRequestEntity(userInfoStr,
-                  "application/json", "UTF-8");
-              m.setRequestEntity(entity);
-              int code = hc.executeMethod(m);
-              if (code == 200) {
-                getLog().info("login successfully!");
-                //写入.osrc文件
-                Map tokenMap = om.readValue(m.getResponseBody(), Map.class);
-                String token = tokenMap.get("accessToken").toString();
-                config.setAccessToken(token);
-                config.setUsername(username);
-                config.setTokenType("Bearer");
-                config.setRemote(osrtAppSite);
-                om.writeValue(osrcFile, config);
-                osrtAppToken = token;
-                header = new Header("Authorization", "Bearer " + osrtAppToken);
-                break;
-              } else {
-                getLog().error(
-                    "install osrt file:" + target + " failed with code: " + code
-                        + ",error message:" + m.getResponseBodyAsString());
-              }
-            } else if ("n".equalsIgnoreCase(yn) || "no".equalsIgnoreCase(yn)) {
-              getLog().info("Skipping install osrt app");
-              return;
-            } else {
-              continue;
-            }
+          boolean flag = checkLoginInfo(osrtAppSite, header, hc, target);
+          if (!flag) {
+            return;
           }
         } else {
           //verify token
@@ -241,68 +200,21 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           if (mgRespStatus == 200) {
             Map map = om.readValue(mg.getResponseBody(), Map.class);
             String username = map.get("username").toString();
-            getLog().info("Install app will be executed by " + username + "!");
+            getLog().info(
+                "The installation will be performed under username: " + username
+                    + "!");
           } else {
             getLog().error("Failed to obtain user information! ");
             getLog().error(
                 "failed with code: " + mgRespStatus + ",error message:" + mg
                     .getResponseBodyAsString());
-            Scanner sc = new Scanner(System.in);
-            while (true) {
-              getLog().info("try to login (y/n)? ");
-              String yn = sc.nextLine();
-              if ("y".equalsIgnoreCase(yn) || "yes".equalsIgnoreCase(yn)) {
-                getLog().info("please input the username: ");
-                String username = sc.nextLine();
-                getLog().info("please input the password: ");
-                String password = sc.nextLine();
-                m = new PostMethod(osrtAppSite + "/api/accounts/signin");
-                Map<String,String> map = Maps.newHashMap();
-                map.put("username", username);
-                map.put("password", password);
-                String userInfoStr = om.writeValueAsString(map);
-                RequestEntity entity = new StringRequestEntity(userInfoStr,
-                    "application/json", "UTF-8");
-                m.setRequestEntity(entity);
-                int code = hc.executeMethod(m);
-                if (code == 200) {
-                  getLog().info("login successfully!");
-                  //写入.osrc文件
-                  Map tokenMap = om.readValue(m.getResponseBody(), Map.class);
-                  String token = tokenMap.get("accessToken").toString();
-                  config.setAccessToken(token);
-                  config.setUsername(username);
-                  config.setTokenType("Bearer");
-                  config.setRemote(osrtAppSite);
-                  om.writeValue(osrcFile, config);
-                  osrtAppToken = token;
-                  header = new Header("Authorization",
-                      "Bearer " + osrtAppToken);
-                  break;
-                } else {
-                  getLog().error(
-                      "install osrt file:" + target + " failed with code: "
-                          + code + ",error message:" + m
-                          .getResponseBodyAsString());
-                }
-              } else if ("n".equalsIgnoreCase(yn) || "no"
-                  .equalsIgnoreCase(yn)) {
-                getLog().info("Skipping install osrt app");
-                return;
-              } else {
-                continue;
-              }
+            boolean flag = checkLoginInfo(osrtAppSite, header, hc, target);
+            if (!flag) {
+              return;
             }
           }
         }
 
-        m = new PostMethod(osrtAppSite + "/api/apps/install-app-file");
-        //        Header header = new Header("", "multipart/form-data");
-        //      Header header = new Header("Content-type","multipart/form-data");
-        //      FilePart filePath = new FilePart(target.getName(),target);
-        //getLog().info(osrtAppSite);
-        //getLog().info(osrtAppToken);
-        m.addRequestHeader(header);
         targerJar = new JarFile(target);
 
         JarEntry indexEntry = targerJar.getJarEntry("index.yml");
@@ -314,10 +226,36 @@ public class InstallOsrtAppMojo extends AbstractMojo {
             .readFully(targerJar.getInputStream(indexEntry),
                 (int) indexEntry.getSize(), true);
         ByteArrayPartSource bps = new ByteArrayPartSource("index.yml", index);
-        Part[] parts = {
-            new FilePart("index", bps, FilePart.DEFAULT_CONTENT_TYPE,
-                StandardCharsets.UTF_8.name()),
-            new FilePart("appFile", target)};
+        FilePart indexFilePart = new FilePart("index", bps,
+            FilePart.DEFAULT_CONTENT_TYPE, StandardCharsets.UTF_8.name());
+        PostMethod check = new PostMethod(osrtAppSite + "/api/apps/check");
+        check.addRequestHeader(header);
+        Part[] indexPart = {indexFilePart};
+        MultipartRequestEntity mreIndex = new MultipartRequestEntity(indexPart,
+            check.getParams());
+        //      FileRequestEntity fileRequestEntity = new FileRequestEntity(target,"multipart/form-data");
+        check.setRequestEntity(mreIndex);
+        int code = hc.executeMethod(check);
+        if (code == 200) {
+          Map map = om.readValue(check.getResponseBody(), Map.class);
+          Integer innerCode = (Integer) map.get("code");
+          if (200 == innerCode) {
+            getLog().info(map.get("msg").toString());
+          } else {
+            getLog().error(map.get("msg") + "\nApp info: " + om
+                .writeValueAsString(map.get("data")));
+            return;
+          }
+        } else {
+          getLog().error(
+              "install osrt file:" + target + " failed with code: " + code
+                  + ",error message:" + check.getResponseBodyAsString());
+          return;
+        }
+
+        m = new PostMethod(osrtAppSite + "/api/apps/install-app-file");
+        m.addRequestHeader(header);
+        Part[] parts = {indexFilePart, new FilePart("appFile", target)};
 
         MultipartRequestEntity mre = new MultipartRequestEntity(parts,
             m.getParams());
@@ -334,6 +272,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
               "install osrt file:" + target + " failed with code: " + respStatus
                   + ",error message:" + m.getResponseBodyAsString());
         }
+      } catch (Exception e) {
+        e.printStackTrace();
       } finally {
         IOUtils.closeQuietly(targerJar);
         if (m != null) {
@@ -344,8 +284,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         }
       }
 
-    } catch (IOException e) {
-      throw new MojoFailureException("IOException", e);
+    } catch (Exception e) {
+      throw new MojoFailureException("Exception", e);
     }
 
   }
@@ -368,23 +308,62 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     this.skip = skip;
   }
 
-  public static void main(String[] args) throws IOException {
-    HttpClient hc = new HttpClient();
-    PostMethod m = null;
-    String url = "https://www.osrc.com/api/accounts/signin";
-    m = new PostMethod(url);
-
-    String body = "{\"username\":\"ccc\",\"password\":\"000000\"}";
-    RequestEntity entity = new StringRequestEntity(body, "application/json",
-        "UTF-8");
-    m.setRequestEntity(entity);
-
-    int code = hc.executeMethod(m);
-    System.out.println(code);
+  public boolean checkLoginInfo(String osrtAppSite, Header header,
+      HttpClient hc, File target) throws Exception {
+    Scanner sc = new Scanner(System.in);
     ObjectMapper om = new ObjectMapper();
+    PostMethod m = null;
+    while (true) {
+      getLog().info("please login (y/n)? ");
+      String yn = sc.nextLine();
+      if ("y".equalsIgnoreCase(yn) || "yes".equalsIgnoreCase(yn)) {
+        getLog().info("please input the username: ");
+        String username = sc.nextLine();
+        getLog().info("please input the password: ");
+        String password = sc.nextLine();
+        m = new PostMethod(osrtAppSite + "/api/accounts/signin");
+        Map<String,String> map = Maps.newHashMap();
+        map.put("username", username);
+        map.put("password", password);
+        String userInfoStr = om.writeValueAsString(map);
+        RequestEntity entity = new StringRequestEntity(userInfoStr,
+            "application/json", "UTF-8");
+        m.setRequestEntity(entity);
+        int code = hc.executeMethod(m);
+        if (code == 200) {
+          getLog().info("login successfully!");
+          getLog().info(
+              "The installation will be performed under username: " + username
+                  + "!");
+          Map tokenMap = om.readValue(m.getResponseBody(), Map.class);
+          String token = tokenMap.get("accessToken").toString();
+          Config config = new Config();
+          config.setAccessToken(token);
+          config.setUsername(username);
+          config.setTokenType("Bearer");
+          config.setRemote(osrtAppSite);
+          File osrcFile = new File(SystemUtils.getUserHome(), ".osrc");
+          om.writeValue(osrcFile, config);
+          header.setName("Authorization");
+          header.setValue("Bearer " + token);
+          break;
+        } else {
+          getLog().error(
+              "install osrt file:" + target + " failed with code: " + code
+                  + ",error message:" + m.getResponseBodyAsString());
+        }
+      } else if ("n".equalsIgnoreCase(yn) || "no".equalsIgnoreCase(yn)) {
+        getLog().info("Skipping install osrt app");
+        return false;
+      } else {
+        continue;
+      }
+    }
+    return true;
+  }
 
-    Map map = om.readValue(m.getResponseBody(), Map.class);
-    System.out.println(map);
+  public static void main(String[] args) {
 
   }
+
 }
