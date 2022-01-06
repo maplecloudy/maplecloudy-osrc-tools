@@ -17,7 +17,7 @@ commander.option('-r,--remote <remote>', 'config osrc deploy target, this is for
   }
 });
 
-commander.command('config', 'print configs');
+commander.command('info', 'print config info');
 
 commander.command('login', 'login osrc');
 
