@@ -498,14 +498,14 @@ public abstract class MainClassFinder {
         }
       }
 
-      Set<String> matchingMains = new LinkedHashSet<>();
-      matchingMainClasses.forEach(new Consumer<MainClass>() {
-
-        @Override
-        public void accept(MainClass t) {
-          matchingMains.add(t.getName());
-        }
-      });
+      //Set<String> matchingMains = new LinkedHashSet<>();
+      //matchingMainClasses.forEach(new Consumer<MainClass>() {
+      //
+      //  @Override
+      //  public void accept(MainClass t) {
+      //    matchingMains.add(t.getName());
+      //  }
+      //});
       return (matchingMainClasses.isEmpty() ? null : matchingMainClasses);
     }
 

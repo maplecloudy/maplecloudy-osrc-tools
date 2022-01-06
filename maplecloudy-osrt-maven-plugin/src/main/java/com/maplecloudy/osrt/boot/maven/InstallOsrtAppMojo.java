@@ -348,7 +348,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           Config config = new Config();
           config.setAccessToken(token);
           config.setUsername(username);
-          config.setTokenType("Bearer");
+          config.setTokenType(tokenMap.get("tokenType").toString());
           config.setRemote(osrtAppSite);
           File osrcFile = new File(SystemUtils.getUserHome(), ".osrc");
           om.writeValue(osrcFile, config);
