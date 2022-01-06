@@ -1,49 +1,47 @@
-# mcli
+# osrc-cli
 
-## 开发
+## the dev tech
 
-使用nodejs esmodule方式开发
+usr 'nodejs esmodule' for the osrc command tools
 
-开发时 
-`DEBUG=* nodejs scripts/mcli/mcli.mjs login`
+for debug
+`DEBUG=* nodejs scripts/osr-cli/osrc-cli.mjs login`
 
-## 配置远程服务地址
+## specific the remote osrc addr for deploy
 this is for devleper, the default is https://www.osrc.com/, you can ignore this cmd!
 ```bash
-osrc-cli -r https://www.osrc.com/
-osrc-cli --remote https://www.osrc.com/
+osrc -r https://www.osrc.com/
+osrc --remote https://www.osrc.com/
 ```
 
-## 登录
+## login
 
 ```bash
-osrc-cli login
-# 进入交互模式, 输入用户名/密码, 取回token后, 保存到本地
+osrc login
+# input username and password, got the token and store
 ``` 
 
-## 打包发布
+## deploy
 the deploy dir defalut as 'dist', if your project build output as 'dist',you can ignore this para!
 ```bash
-# 本地开发构建完成后
-# 指定发布目录
-osrc-cli deploy -d dist
-osrc-cli deploy --dirname dist
-# 检索package.json中name/version等必要信息
-# 将dirname目录中文件压缩成.tar.gz格式后, 上传到服务器
+# after the build finishedd
+# specific the deploy dir
+osrc deploy -d dist
+osrc deploy --dirname dist
 ```
 
-## 查看配置 TODO
+##  print the osrc config info of current
 ```bash
-osrc-cli info
+osrc info
 ```
 
-## 本地配置的存储
+## the login to osrc config file store as
 
-位置: `~/.osrc`
-
+location: `~/.osrc`
+the config info store as:
 ```json
 {
-  "remote": "http://192.168.8.103:16891",
+  "remote": "https://www.osrc.com",
   "username": "yuanbo",
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkwNzU3NjEsInVzZXJfbmFtZSI6Inl1YW5ibyIsImF1dGhvcml0aWVzIjpbInVzZXIiXSwianRpIjoiNVZNNVNSRzNoanRaX19YUVlFMzllQ3RRREowIiwiY2xpZW50X2lkIjoibWFwbGVjbG91ZHkiLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXX0.jMJI8wyZhr-OEBvFdtyHPTW9bxJZjxFehSpEvqmn_Zi3kyIkvoFcwtToFz7w6M9q4ECFBuGXuo8YlLehILmfcQXM-cOP4tzpo9as8_1Jot4JD5FXQqbd3pRTEcxUKhK4QgJ7p8JKsEbjaHQDzN_9RkxjkLEW-yDpYks0DCk80Rdlo__UvQkgLaXMFAruULsxvYxTn7YvkLDG_xs4MLDv0sO9Y73Hotl1z_qjUm-yOjOus4CkjGh9XYYyL9ZTeuQ1YQFeWY-BYjT_tSjCR85SiRZZsf5Ozc9FiJCo2yX9b7JjaTlrRa_AHIOmZnXRVLUoSWvKew5hzL0M2n5aqipzsQ",
   "tokenType": "bearer"
