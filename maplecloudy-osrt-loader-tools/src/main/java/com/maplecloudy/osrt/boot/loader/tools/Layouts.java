@@ -147,7 +147,7 @@ public final class Layouts {
 
 		@Override
 		public String getLauncherClassName() {
-			return "org.springframework.boot.loader.WarLauncher";
+			return "com.maplecloudy.osrt.boot.loader.WarLauncher";
 		}
 
 		@Override

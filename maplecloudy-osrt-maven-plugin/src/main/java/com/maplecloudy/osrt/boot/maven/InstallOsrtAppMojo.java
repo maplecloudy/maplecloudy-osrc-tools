@@ -62,30 +62,30 @@ import java.util.jar.JarFile;
 @Mojo(name = "install-osrt-app", defaultPhase = LifecyclePhase.INSTALL, requiresProject = true, threadSafe = true)
 @Execute(phase = LifecyclePhase.INSTALL)
 public class InstallOsrtAppMojo extends AbstractMojo {
-
+  
   /**
    * When building with multiple threads, reaching the last project doesn't have
    * to mean that all projects are ready to be installed
    */
   private static final AtomicInteger READYPROJECTSCOUTNER = new AtomicInteger();
-
+  
   private static final List<ProjectInstallerRequest> INSTALLREQUESTS = Collections
       .synchronizedList(new ArrayList<ProjectInstallerRequest>());
-
+  
   /**
    */
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
-
+  
   @Parameter(defaultValue = "${reactorProjects}", required = true, readonly = true)
   private List<MavenProject> reactorProjects;
-
+  
   @Parameter(defaultValue = "${project.build.finalName}-osrc-app", readonly = true)
   private String finalName;
-
+  
   @Parameter
   private String classifier;
-
+  
   /**
    * Directory containing the generated archive.
    *
@@ -93,7 +93,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = "${project.build.directory}", required = true)
   private File outputDirectory;
-
+  
   /**
    * Whether every project should be installed during its own install-phase or
    * at the end of the multimodule build. If set to {@code true} and the build
@@ -104,7 +104,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = "false", property = "installAtEnd")
   private boolean installAtEnd;
-
+  
   /**
    * Set this to <code>true</code> to bypass artifact installation. Use this for
    * artifacts that does not need to be installed in the local repository.
@@ -113,7 +113,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
    */
   @Parameter(property = "install.osrt.skip", defaultValue = "false")
   private boolean skip;
-
+  
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
       getLog().info("Skipping install osrt app");
@@ -121,7 +121,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
       installProject();
     }
   }
-
+  
   private void installProject()
       throws MojoFailureException, MojoExecutionException {
     try {
@@ -129,27 +129,27 @@ public class InstallOsrtAppMojo extends AbstractMojo {
       getLog().info("install osrt Artifact:" + artifact);
       String packaging = project.getPackaging();
       File pomFile = project.getFile();
-
+      
       List<Artifact> attachedArtifacts = project.getAttachedArtifacts();
-
+      
       getLog().info("install osrt attachedArtifacts:" + attachedArtifacts);
       boolean isPomArtifact = "pom".equals(packaging);
-
+      
       ProjectArtifactMetadata metadata;
-
+      
       getLog().info("install osrt isPomArtifact:" + isPomArtifact);
       if (isPomArtifact)// app intall ingore pom Artifact
       {
         getLog().info("install osrt skip Pom Artifact!");
         return;
       }
-      //        else {
+      // else {
       //
-      //        if (pomFile != null) {
-      //          metadata = new ProjectArtifactMetadata(artifact, pomFile);
-      //          artifact.addMetadata(metadata);
-      //        }
-      //      }
+      // if (pomFile != null) {
+      // metadata = new ProjectArtifactMetadata(artifact, pomFile);
+      // artifact.addMetadata(metadata);
+      // }
+      // }
       JarFile targerJar = null;
       PostMethod m = null;
       GetMethod mg = null;
@@ -170,8 +170,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           config = om.readValue(osrcFile, Config.class);
         }
         if (StringUtils.isBlank(osrtAppSite)) {
-          if (!ObjectUtils.isEmpty(config) && !ObjectUtils
-              .isEmpty(config.getRemote())) {
+          if (!ObjectUtils.isEmpty(config)
+              && !ObjectUtils.isEmpty(config.getRemote())) {
             osrtAppSite = config.getRemote();
           } else {
             config = new Config();
@@ -180,51 +180,48 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           }
         }
         if (StringUtils.isBlank(osrtAppToken)) {
-          if (!ObjectUtils.isEmpty(config) && !ObjectUtils
-              .isEmpty(config.getAccessToken())) {
+          if (!ObjectUtils.isEmpty(config)
+              && !ObjectUtils.isEmpty(config.getAccessToken())) {
             osrtAppToken = config.getAccessToken();
           }
         }
         Header header = new Header("Authorization", "Bearer " + osrtAppToken);
-        ;
         if (ObjectUtils.isEmpty(osrtAppToken)) {
           boolean flag = checkLoginInfo(osrtAppSite, header, hc, target);
           if (!flag) {
             return;
           }
         } else {
-          //verify token
+          // verify token
           mg = new GetMethod(osrtAppSite + "/api/user");
           mg.addRequestHeader(header);
           int mgRespStatus = hc.executeMethod(mg);
           if (mgRespStatus == 200) {
             Map map = om.readValue(mg.getResponseBody(), Map.class);
             String username = map.get("username").toString();
-            getLog().info(
-                "The installation will be performed under username: " + username
-                    + "!");
+            getLog().info("The installation will be performed under username: "
+                + username + "!");
           } else {
             getLog().error("Failed to obtain user information! ");
-            getLog().error(
-                "failed with code: " + mgRespStatus + ",error message:" + mg
-                    .getResponseBodyAsString());
+            getLog().error("failed with code: " + mgRespStatus
+                + ",error message:" + mg.getResponseBodyAsString());
             boolean flag = checkLoginInfo(osrtAppSite, header, hc, target);
             if (!flag) {
               return;
             }
           }
         }
-
+        
         targerJar = new JarFile(target);
-
+        
         JarEntry indexEntry = targerJar.getJarEntry("index.yml");
         if (indexEntry == null) {
           getLog().error("install osrt skip package not have [index.yml]!");
           return;
         }
-        byte[] index = sun.misc.IOUtils
-            .readFully(targerJar.getInputStream(indexEntry),
-                (int) indexEntry.getSize(), true);
+        byte[] index = sun.misc.IOUtils.readFully(
+            targerJar.getInputStream(indexEntry), (int) indexEntry.getSize(),
+            true);
         ByteArrayPartSource bps = new ByteArrayPartSource("index.yml", index);
         FilePart indexFilePart = new FilePart("index", bps,
             FilePart.DEFAULT_CONTENT_TYPE, StandardCharsets.UTF_8.name());
@@ -233,7 +230,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         Part[] indexPart = {indexFilePart};
         MultipartRequestEntity mreIndex = new MultipartRequestEntity(indexPart,
             check.getParams());
-        //      FileRequestEntity fileRequestEntity = new FileRequestEntity(target,"multipart/form-data");
+        // FileRequestEntity fileRequestEntity = new
+        // FileRequestEntity(target,"multipart/form-data");
         check.setRequestEntity(mreIndex);
         int code = hc.executeMethod(check);
         if (code == 200) {
@@ -242,35 +240,34 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           if (200 == innerCode) {
             getLog().info(map.get("msg").toString());
           } else {
-            getLog().error(map.get("msg") + "\nApp info: " + om
-                .writeValueAsString(map.get("data")));
+            getLog().error(map.get("msg") + "\nApp info: "
+                + om.writeValueAsString(map.get("data")));
             return;
           }
         } else {
-          getLog().error(
-              "install osrt file:" + target + " failed with code: " + code
-                  + ",error message:" + check.getResponseBodyAsString());
+          getLog().error("install osrt file:" + target + " failed with code: "
+              + code + ",error message:" + check.getResponseBodyAsString());
           return;
         }
-
+        
         m = new PostMethod(osrtAppSite + "/api/apps/install-app-file");
         m.addRequestHeader(header);
         Part[] parts = {indexFilePart, new FilePart("appFile", target)};
-
+        
         MultipartRequestEntity mre = new MultipartRequestEntity(parts,
             m.getParams());
-        //      FileRequestEntity fileRequestEntity = new FileRequestEntity(target,"multipart/form-data");
+        // FileRequestEntity fileRequestEntity = new
+        // FileRequestEntity(target,"multipart/form-data");
         m.setRequestEntity(mre);
-
+        
         getLog().info("begin to deploy app...");
         int respStatus = hc.executeMethod(m);
         if (respStatus == 200) {
           getLog().info("install osrt file:" + target + " sucesss!");
           getLog().info("App info: " + m.getResponseBodyAsString());
         } else {
-          getLog().error(
-              "install osrt file:" + target + " failed with code: " + respStatus
-                  + ",error message:" + m.getResponseBodyAsString());
+          getLog().error("install osrt file:" + target + " failed with code: "
+              + respStatus + ",error message:" + m.getResponseBodyAsString());
         }
       } catch (Exception e) {
         e.printStackTrace();
@@ -283,13 +280,13 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           mg.releaseConnection();
         }
       }
-
+      
     } catch (Exception e) {
       throw new MojoFailureException("Exception", e);
     }
-
+    
   }
-
+  
   protected File getTargetFile(String finalName, String classifier,
       File targetDirectory) {
     String classifierSuffix = (classifier != null) ? classifier.trim() : "";
@@ -299,15 +296,14 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     if (!targetDirectory.exists()) {
       targetDirectory.mkdirs();
     }
-    return new File(targetDirectory,
-        finalName + classifierSuffix + "." + this.project.getArtifact()
-            .getArtifactHandler().getExtension());
+    return new File(targetDirectory, finalName + classifierSuffix + "."
+        + this.project.getArtifact().getArtifactHandler().getExtension());
   }
-
+  
   public void setSkip(boolean skip) {
     this.skip = skip;
   }
-
+  
   public boolean checkLoginInfo(String osrtAppSite, Header header,
       HttpClient hc, File target) throws Exception {
     Scanner sc = new Scanner(System.in);
@@ -332,9 +328,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         int code = hc.executeMethod(m);
         if (code == 200) {
           getLog().info("login successfully!");
-          getLog().info(
-              "The installation will be performed under username: " + username
-                  + "!");
+          getLog().info("The installation will be performed under username: "
+              + username + "!");
           Map tokenMap = om.readValue(m.getResponseBody(), Map.class);
           String token = tokenMap.get("accessToken").toString();
           Config config = new Config();
@@ -348,9 +343,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           header.setValue("Bearer " + token);
           break;
         } else {
-          getLog().error(
-              "install osrt file:" + target + " failed with code: " + code
-                  + ",error message:" + m.getResponseBodyAsString());
+          getLog().error("install osrt file:" + target + " failed with code: "
+              + code + ",error message:" + m.getResponseBodyAsString());
         }
       } else if ("n".equalsIgnoreCase(yn) || "no".equalsIgnoreCase(yn)) {
         getLog().info("Skipping install osrt app");
@@ -361,9 +355,9 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     }
     return true;
   }
-
+  
   public static void main(String[] args) {
-
+    
   }
-
+  
 }

@@ -24,8 +24,6 @@ import com.maplecloudy.osrt.boot.loader.archive.Archive.Entry;
  * Supports dependencies in {@code WEB-INF/lib} as well as {@code WEB-INF/lib-provided},
  * classes are loaded from {@code WEB-INF/classes}.
  *
- * @author Phillip Webb
- * @author Andy Wilkinson
  * @since 1.0.0
  */
 public class WarLauncher extends ExecutableArchiveLauncher {
