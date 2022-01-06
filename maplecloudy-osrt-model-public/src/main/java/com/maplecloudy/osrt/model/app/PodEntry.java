@@ -13,9 +13,4 @@ public class PodEntry{
   public String cmd;
   public AppPodType appPodType;
   public String entry;
-
-  @Override
-  public String toString() {
-    return entry;
-  }
 }

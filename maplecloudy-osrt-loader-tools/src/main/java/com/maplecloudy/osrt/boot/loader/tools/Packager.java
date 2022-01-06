@@ -400,8 +400,6 @@ public abstract class Packager {
           podEntry.appPodType = AppPodType.SERVICE;
           podEntry.entry = mc.getName();
           podEntries.add(podEntry);
-          manifest.getMainAttributes()
-              .putValue(SERVICE_CLASS_ATTRIBUTE, mc.getName());
         } else if (annotationNames
             .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[1])) {
           if (podEntries.stream()
@@ -415,8 +413,6 @@ public abstract class Packager {
           podEntry.appPodType = AppPodType.SERVICE;
           podEntry.entry = mc.getName();
           podEntries.add(podEntry);
-          manifest.getMainAttributes()
-              .putValue(SERVICE_CLASS_ATTRIBUTE, mc.getName());
         } else if (annotationNames
             .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[0])) {
           PodEntry podEntry = new PodEntry();
@@ -426,15 +422,31 @@ public abstract class Packager {
           podEntry.appPodType = AppPodType.TASK;
           podEntry.entry = mc.getName();
           podEntries.add(podEntry);
+        } else {
+          PodEntry podEntry = new PodEntry();
+          podEntry.cmd = "$JAVA_HOME/bin/java $JVM_OPS -jar "
+              + runAbleApp.appPackage.packageName;
+          podEntry.appPodType = AppPodType.SERVICE;
+          podEntry.entry = mc.getName();
+          podEntries.add(podEntry);
         }
       }
       if (!ObjectUtils.isEmpty(podEntries)) {
-        List<PodEntry> taskEntries = podEntries.stream()
+        List<String> taskEntries = podEntries.stream()
             .filter(podEntry -> podEntry.appPodType == AppPodType.TASK)
-            .collect(Collectors.toList());
+            .map(podEntry -> podEntry.entry).collect(Collectors.toList());
+
         if (!ObjectUtils.isEmpty(taskEntries)) {
           manifest.getMainAttributes().putValue(TASK_CLASS_ATTRIBUTE,
               StringUtils.collectionToDelimitedString(taskEntries, ","));
+        }
+        List<String> serviceEntry = podEntries.stream()
+            .filter(podEntry -> podEntry.appPodType == AppPodType.SERVICE)
+            .map(podEntry -> podEntry.entry).collect(Collectors.toList());
+
+        if (!ObjectUtils.isEmpty(serviceEntry)) {
+          manifest.getMainAttributes()
+              .putValue(SERVICE_CLASS_ATTRIBUTE, serviceEntry.get(0));
         }
       }
       runAbleApp.podEntries = podEntries;
