@@ -1,9 +1,9 @@
 {
   "name": "osrc-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "osrc publish tools for frontend project",
   "bin": {
-    "osrc": "src/osrc.mjs"
+    "osrc": "src/index.mjs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
