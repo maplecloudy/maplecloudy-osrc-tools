@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.maplecloudy.osrt</groupId>
         <artifactId>maplecloudy-osrt-tools</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0-RELEASE</version>
     </parent>
     <artifactId>maplecloudy-osrt-jarmode-layertools</artifactId>
 
