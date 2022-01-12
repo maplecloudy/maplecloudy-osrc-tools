@@ -24,7 +24,7 @@ Commands:
 - tips :  
 *osrc-cli support "node": "^12.20.0 || ^14.13.1 || >=16.0.0"*
 - workaround for other node version: 
-*build the SPA project with your wanted node version, the switch to others node version for usr osrc cli!*
+*build the SPA project with your wanted node version, the switch to others node version for use osrc cli!*
 ## the dev tech
 
 usr 'nodejs esmodule' for the osrc command tools
