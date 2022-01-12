@@ -1,5 +1,30 @@
 # osrc-cli
+one cli tools for users deploy SPA to osrc Pages.
+## for users deploy SPA to osrc Pages
+```bash
+npm i -g osrc-cli
+```
+then you can get the cli 'osrc', just use it like:
+```bash
+osrc
+Usage: osrc [command]
 
+osrc frontend tools
+
+Options:
+  -V, --version         output the version number
+  -r,--remote <remote>  config osrc deploy target, this is for developer of osrc,defalut is https://www.osrc.com,
+  -h, --help            display help for command
+
+Commands:
+  info                  print config info
+  login                 login osrc
+  deploy                deploy built assets to osrc, default target is dist
+```
+- tips :  
+*osrc-cli support "node": "^12.20.0 || ^14.13.1 || >=16.0.0"*
+- workaround for other node version: 
+*build the SPA project with your wanted node version, the switch to others node version for usr osrc cli!*
 ## the dev tech
 
 usr 'nodejs esmodule' for the osrc command tools
@@ -7,6 +32,11 @@ usr 'nodejs esmodule' for the osrc command tools
 for debug
 `DEBUG=* nodejs scripts/osr-cli/osrc-cli.mjs login`
 
+for dev use 'npm link' get the osrc cmd
+```bash
+npm link
+osrc
+```
 ## specific the remote osrc addr for deploy
 this is for devleper, the default is https://www.osrc.com/, you can ignore this cmd!
 ```bash

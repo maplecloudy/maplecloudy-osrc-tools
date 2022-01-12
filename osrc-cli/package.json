@@ -18,6 +18,9 @@
     "node-fetch": "^3.1.0",
     "tar": "^6.1.11"
   },
-  "author": "",
+  "engines": {
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+  },
+  "author": "osrc",
   "license": "ISC"
 }
