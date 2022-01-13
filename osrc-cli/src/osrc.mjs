@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 import commander from "commander";
 import fse from 'fs-extra'
 import path from 'path'

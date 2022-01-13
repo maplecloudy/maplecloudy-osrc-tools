@@ -29,29 +29,29 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <git-commit-id-plugin.version>2.2.5</git-commit-id-plugin.version>
-        <guava.version>19.0</guava.version>
+        <guava.version>31.0.1-jre</guava.version>
         <maven.version>3.6.0</maven.version>
         <jackson.version>2.11.4</jackson.version>
-        <loader.version>1.0.0-SNAPSHOT</loader.version>
+        
         <maven.shade>3.2.4</maven.shade>
-        <model.public>1.0.0-SNAPSHOT</model.public>
+        
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.maplecloudy.osrt</groupId>
                 <artifactId>maplecloudy-osrt-loader</artifactId>
-                <version>${loader.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.maplecloudy.osrt</groupId>
                 <artifactId>maplecloudy-osrt-loader-tools</artifactId>
-                <version>${loader.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.maplecloudy.osrt</groupId>
                 <artifactId>maplecloudy-osrt-model-public</artifactId>
-                <version>${model.public}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-httpclient</groupId>
@@ -84,7 +84,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
-                <version>5.2.13.RELEASE</version>
+                <version>5.3.14</version>
                 <optional>true</optional>
             </dependency>
             <dependency>
@@ -179,13 +179,6 @@
                 <groupId>org.sonatype.plexus</groupId>
                 <artifactId>plexus-build-api</artifactId>
                 <version>0.0.7</version>
-            </dependency>
-            <!-- Optional -->
-            <dependency>
-                <groupId>org.apache.maven.plugin-tools</groupId>
-                <artifactId>maven-plugin-annotations</artifactId>
-                <version>${maven.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
