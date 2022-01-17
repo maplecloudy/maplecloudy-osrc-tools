@@ -227,9 +227,11 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           getLog().error("install osrt skip package not have [index.yml]!");
           return;
         }
-        byte[] index = sun.misc.IOUtils
-            .readFully(targerJar.getInputStream(indexEntry),
-                (int) indexEntry.getSize(), true);
+        byte[] index = IOUtils.readFully(targerJar.getInputStream(indexEntry),
+            (int) indexEntry.getSize());
+        //byte[] index = sun.misc.IOUtils
+        //    .readFully(targerJar.getInputStream(indexEntry),
+        //        (int) indexEntry.getSize(), true);
         ByteArrayPartSource bps = new ByteArrayPartSource("index.yml", index);
         FilePart indexFilePart = new FilePart("index", bps,
             FilePart.DEFAULT_CONTENT_TYPE, StandardCharsets.UTF_8.name());
