@@ -193,7 +193,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
           }
         } else {
           // verify token
-          mg = new GetMethod(osrtAppSite + "/api/user");
+          mg = new GetMethod(osrtAppSite + "/api/users");
           mg.addRequestHeader(header);
           int mgRespStatus = hc.executeMethod(mg);
           if (mgRespStatus == 200) {
@@ -331,7 +331,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         String username = sc.nextLine();
         getLog().info("please input the password: ");
         String password = sc.nextLine();
-        m = new PostMethod(osrtAppSite + "/api/accounts/signin");
+        m = new PostMethod(osrtAppSite + "/api/users/signin");
         Map<String,String> map = Maps.newHashMap();
         map.put("username", username);
         map.put("password", password);
