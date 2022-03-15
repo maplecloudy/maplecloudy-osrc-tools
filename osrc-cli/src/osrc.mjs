@@ -1,23 +1,20 @@
 #! /usr/bin/env node
 import commander from "commander";
-import fse from 'fs-extra'
-import path from 'path'
 import { loadConfig, saveConfig } from "./utils.mjs";
 
+import { readFile } from 'fs/promises';
 
-const __dirname = path.resolve();
+// read package.json
+const packageJson = JSON.parse(
+  await readFile(
+    new URL('../package.json', import.meta.url)
+  )
+);
 
 (async function () {
-  const packageContent = fse.readFileSync(
-    path.join(__dirname,'package.json'),
-    'utf-8',
-  );
-  const packageJson = JSON.parse(packageContent);
-  const version = packageJson.version;
-
-
+  // use package.json "version" value
   commander
-    .version(version)
+    .version(packageJson.version)
     .usage(`[command]`)
     .description("osrc frontend tools");
 
