@@ -10,7 +10,31 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PodEntry{
-  public String cmd;
-  public AppPodType appPodType;
-  public String entry;
+  private String cmd;
+  private AppPodType appPodType;
+  private String entry;
+
+  public String getCmd() {
+    return cmd;
+  }
+
+  public void setCmd(String cmd) {
+    this.cmd = cmd;
+  }
+
+  public AppPodType getAppPodType() {
+    return appPodType;
+  }
+
+  public void setAppPodType(AppPodType appPodType) {
+    this.appPodType = appPodType;
+  }
+
+  public String getEntry() {
+    return entry;
+  }
+
+  public void setEntry(String entry) {
+    this.entry = entry;
+  }
 }

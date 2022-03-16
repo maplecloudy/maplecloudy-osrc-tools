@@ -13,31 +13,28 @@ import java.util.List;
 public abstract class AppLocation {
 
   @Schema(description = "应用的类型,SERVICE类型，除非主动停止不会主动停止的应用，比如任何web service，TASK类型，在完成工作后，会自动停止的应用，TOOLS，提供运行环境类的应用，可以被其他应用作为依赖，比如JAVA环境是一个TOOLS应用")
-  public AppType type;
+  private AppType type;
   @Schema(description = "决定应用的路径，可以为空，以Java为例，一个应用一般由groupId和artifactId组成")
-  public List<String> bundle = Lists.newArrayList();
+  private List<String> bundle = Lists.newArrayList();
 
   @Schema(description = "应用编译时继承版本信息")
-  public String version;
+  private String version;
   @Schema(description = "应用在发布的时候重新定义的版本信息")
-  public String releaseVersion;
-
-  @Schema(description = "应用对应的代码仓库信息")
-  public Repository repository;
+  private String releaseVersion;
 
   @Schema(description = "对应代码仓库的commit信息，包含branch和Hash")
-  public Commit commit;
+  private Commit commit;
 
   @Schema(description = "应用对应的package，一个APP只能包含一个文件，可以是FILE和ARCHIVE两种类型")
-  public AppPackage appPackage = new AppPackage();
+  private AppPackage appPackage = new AppPackage();
 
-  public String appPath;
+  private String appPath;
 
-  public String appKey;
+  private String appKey;
 
-  public String osrtAppKey;
+  private String osrtAppKey;
 
-  public String osrtAppPath;
+  private String osrtAppPath;
 
   public void setAppPath(String appPath) {
     this.appPath = appPath;
@@ -105,14 +102,6 @@ public abstract class AppLocation {
 
   public void setReleaseVersion(String releaseVersion) {
     this.releaseVersion = releaseVersion;
-  }
-
-  public Repository getRepository() {
-    return repository;
-  }
-
-  public void setRepository(Repository repository) {
-    this.repository = repository;
   }
 
   public Commit getCommit() {

@@ -61,7 +61,7 @@ export function collectInfo(packageJson) {
 export async function login(username, password) {
   const config = loadConfig();
   debug('config', config);
-  const response = await fetch(`${config.remote}/api/accounts/signin`, {
+  const response = await fetch(`${config.remote}/api/users/signin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

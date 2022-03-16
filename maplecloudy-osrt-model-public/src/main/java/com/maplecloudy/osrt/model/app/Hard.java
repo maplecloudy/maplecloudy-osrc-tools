@@ -11,71 +11,69 @@ import java.util.Objects;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Hard {
-  public long memory = 1024;
-  public int virtualCores = 1;
-  String[] nodes = null;
-  String[] racks = null;
-  int priority = 1;
-  HashMap<String,Object> configMap = Maps.newHashMap();
-  
+  private long memory = 1024;
+  private int virtualCores = 1;
+  private String[] nodes = null;
+  private String[] racks = null;
+  private int priority = 1;
+  private HashMap<String,Object> configMap = Maps.newHashMap();
+
   public void setNode(String node) {
     this.nodes = new String[] {node};
   }
-  
+
   public long getMemory() {
     return memory;
   }
-  
+
   public int getVirtualCores() {
     return virtualCores;
   }
-  
+
   public void setVirtualCores(int virtualCores) {
     this.virtualCores = virtualCores;
   }
-  
+
   public String[] getNodes() {
     return nodes;
   }
-  
+
   public void setNodes(String[] nodes) {
     this.nodes = nodes;
   }
-  
+
   public String[] getRacks() {
     return racks;
   }
-  
+
   public void setRacks(String[] racks) {
     this.racks = racks;
   }
-  
+
   public int getPriority() {
     return priority;
   }
-  
+
   public void setPriority(int priority) {
     this.priority = priority;
   }
-  
+
   public HashMap<String,Object> getConfigMap() {
     return configMap;
   }
-  
+
   public void setConfigMap(HashMap<String,Object> configMap) {
     this.configMap = configMap;
   }
-  
 
-  
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + Arrays.hashCode(nodes);
     result = prime * result + Arrays.hashCode(racks);
-    result = prime * result
-        + Objects.hash(configMap, memory, priority, virtualCores);
+    result = prime * result + Objects
+        .hash(configMap, memory, priority, virtualCores);
     return result;
   }
 

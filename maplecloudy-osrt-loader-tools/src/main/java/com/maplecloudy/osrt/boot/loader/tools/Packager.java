@@ -247,60 +247,61 @@ public abstract class Packager {
     if (isLayered()) {
       writer.useLayers(this.layers, this.layersIndex);
     }
-    runAbleApp.appPackage.packageName = this.artifact.getFile().getName();
-    runAbleApp.appPackage.type = AppPackage.Type.FILE;
-    runAbleApp.type = AppType.RUNABLE;
-    runAbleApp.name = project.getName();
-    runAbleApp.description = project.getDescription();
-    runAbleApp.bundle.add(project.getGroupId());
-    runAbleApp.bundle.add(project.getArtifactId());
+    runAbleApp.getAppPackage()
+        .setPackageName(this.artifact.getFile().getName());
+    runAbleApp.getAppPackage().setType(AppPackageType.FILE);
+    runAbleApp.setType(AppType.RUNABLE);
+    runAbleApp.setName(project.getName());
+    runAbleApp.setDescription(project.getDescription());
+    runAbleApp.getBundle().add(project.getGroupId());
+    runAbleApp.getBundle().add(project.getArtifactId());
     if (artifact.hasClassifier()) {
-      runAbleApp.bundle.add(artifact.getClassifier());
+      runAbleApp.getBundle().add(artifact.getClassifier());
     }
-    runAbleApp.version = artifact.getVersion();
+    runAbleApp.setVersion(artifact.getVersion());
     ObjectMapper om = new ObjectMapper();
     om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     if (!CollectionUtils.isEmpty(project.getDevelopers())) {
-      runAbleApp.developers = om.convertValue(project.getDevelopers(),
+      runAbleApp.setDevelopers(om.convertValue(project.getDevelopers(),
           new TypeReference<List<Developer>>() {
-          });
+          }));
     }
     if (!CollectionUtils.isEmpty(project.getMailingLists())) {
-      runAbleApp.mailingLists = om.convertValue(project.getMailingLists(),
+      runAbleApp.setMailingLists(om.convertValue(project.getMailingLists(),
           new TypeReference<List<MailingList>>() {
-          });
+          }));
     }
     if (project.getScm() != null) {
-      runAbleApp.scm = om.convertValue(project.getScm(), Scm.class);
+      runAbleApp.setScm(om.convertValue(project.getScm(), Scm.class));
     }
     if (project.getOrganization() != null) {
-      runAbleApp.organization = om
-          .convertValue(project.getOrganization(), Organization.class);
+      runAbleApp.setOrganization(
+          om.convertValue(project.getOrganization(), Organization.class));
     }
     if (project.getInceptionYear() != null) {
-      runAbleApp.inceptionYear = project.getInceptionYear();
+      runAbleApp.setInceptionYear(project.getInceptionYear());
     }
     if (project.getUrl() != null) {
-      runAbleApp.url = project.getUrl();
+      runAbleApp.setUrl(project.getUrl());
     }
-    if (artifact.getRepository() != null) {
-      runAbleApp.repository = new com.maplecloudy.osrt.model.repository.Repository();
-      runAbleApp.repository.url = artifact.getRepository().getUrl();
-    }
+    //if (artifact.getRepository() != null) {
+    //  Repository repository = new Repository();
+    //  repository.setUrl(artifact.getRepository().getUrl());
+    //  runAbleApp.setRepository(repository);
+    //}
     if (!CollectionUtils.isEmpty(project.getLicenses())) {
-      runAbleApp.licenses = om.convertValue(project.getLicenses(),
+      runAbleApp.setLicenses(om.convertValue(project.getLicenses(),
           new TypeReference<List<License>>() {
-          });
-
+          }));
     }
     if (!CollectionUtils.isEmpty(project.getContributors())) {
-      runAbleApp.contributors = om.convertValue(project.getContributors(),
+      runAbleApp.setContributors(om.convertValue(project.getContributors(),
           new TypeReference<List<Contributor>>() {
-          });
+          }));
     }
-    runAbleApp.modelEncoding = project.getModel().getModelEncoding();
-    runAbleApp.modelVersion = project.getModel().getModelVersion();
+    runAbleApp.setModelEncoding(project.getModel().getModelEncoding());
+    runAbleApp.setModelVersion(project.getModel().getModelVersion());
 
     writer.writeManifest(buildManifest(sourceJar), runAbleApp);
     writeLoaderClasses(writer);
@@ -388,68 +389,69 @@ public abstract class Packager {
         Set<String> annotationNames = mc.getAnnotationNames();
         if (annotationNames
             .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[2])) {
-          runAbleApp.subType = "spring-boot-application";
+          runAbleApp.setSubType("spring-boot-application");
           if (podEntries.stream()
-              .anyMatch(entry -> entry.appPodType == AppPodType.SERVICE)) {
+              .anyMatch(entry -> entry.getAppPodType() == AppPodType.SERVICE)) {
             throw new IllegalStateException(
                 SERVICE_CLASS_ATTRIBUTE + " can't " + "have more than one");
           }
           PodEntry podEntry = new PodEntry();
-          podEntry.cmd = "$JAVA_HOME/bin/java $JVM_OPS -jar "
-              + runAbleApp.appPackage.packageName;
-          podEntry.appPodType = AppPodType.SERVICE;
-          podEntry.entry = mc.getName();
+          podEntry.setCmd(
+              "$JAVA_HOME/bin/java $JVM_OPS -jar " + runAbleApp.getAppPackage()
+                  .getPackageName());
+          podEntry.setAppPodType(AppPodType.SERVICE);
+          podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
         } else if (annotationNames
             .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[1])) {
           if (podEntries.stream()
-              .anyMatch(entry -> entry.appPodType == AppPodType.SERVICE)) {
+              .anyMatch(entry -> entry.getAppPodType() == AppPodType.SERVICE)) {
             throw new IllegalStateException(
                 SERVICE_CLASS_ATTRIBUTE + " can't " + "have more than one");
           }
           PodEntry podEntry = new PodEntry();
-          podEntry.cmd = "$JAVA_HOME/bin/java $JVM_OPS -jar "
-              + runAbleApp.appPackage.packageName;
-          podEntry.appPodType = AppPodType.SERVICE;
-          podEntry.entry = mc.getName();
+          podEntry.setCmd("$JAVA_HOME/bin/java $JVM_OPS -jar "
+              + runAbleApp.getAppPackage().getPackageName());
+          podEntry.setAppPodType(AppPodType.SERVICE);
+          podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
         } else if (annotationNames
             .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[0])) {
           PodEntry podEntry = new PodEntry();
-          podEntry.cmd = "$JAVA_HOME/bin/java $JVM_OPS -jar "
-              + runAbleApp.appPackage.packageName + " -osrc.main=" + mc
-              .getName();
-          podEntry.appPodType = AppPodType.TASK;
-          podEntry.entry = mc.getName();
+          podEntry.setCmd("$JAVA_HOME/bin/java $JVM_OPS -jar "
+              + runAbleApp.getAppPackage().getPackageName() + " -osrc.main=" + mc
+              .getName());
+          podEntry.setAppPodType(AppPodType.TASK);
+          podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
         } else {
           PodEntry podEntry = new PodEntry();
-          podEntry.cmd = "$JAVA_HOME/bin/java $JVM_OPS -jar "
-              + runAbleApp.appPackage.packageName;
-          podEntry.appPodType = AppPodType.SERVICE;
-          podEntry.entry = mc.getName();
+          podEntry.setCmd("$JAVA_HOME/bin/java $JVM_OPS -jar "
+              + runAbleApp.getAppPackage().getPackageName());
+          podEntry.setAppPodType(AppPodType.SERVICE);
+          podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
         }
       }
       if (!ObjectUtils.isEmpty(podEntries)) {
         List<String> taskEntries = podEntries.stream()
-            .filter(podEntry -> podEntry.appPodType == AppPodType.TASK)
-            .map(podEntry -> podEntry.entry).collect(Collectors.toList());
+            .filter(podEntry -> podEntry.getAppPodType() == AppPodType.TASK)
+            .map(podEntry -> podEntry.getEntry()).collect(Collectors.toList());
 
         if (!ObjectUtils.isEmpty(taskEntries)) {
           manifest.getMainAttributes().putValue(TASK_CLASS_ATTRIBUTE,
               StringUtils.collectionToDelimitedString(taskEntries, ","));
         }
         List<String> serviceEntry = podEntries.stream()
-            .filter(podEntry -> podEntry.appPodType == AppPodType.SERVICE)
-            .map(podEntry -> podEntry.entry).collect(Collectors.toList());
+            .filter(podEntry -> podEntry.getAppPodType() == AppPodType.SERVICE)
+            .map(podEntry -> podEntry.getEntry()).collect(Collectors.toList());
 
         if (!ObjectUtils.isEmpty(serviceEntry)) {
           manifest.getMainAttributes()
               .putValue(SERVICE_CLASS_ATTRIBUTE, serviceEntry.get(0));
         }
       }
-      runAbleApp.podEntries = podEntries;
+      runAbleApp.setPodEntries(podEntries);
     } else if (mainClass != null) {
       Assert.state(launcherClass != null, "Can't find launcherClass");
       //			manifest.getMainAttributes().putValue(MAIN_CLASS_ATTRIBUTE, mainClassStr);

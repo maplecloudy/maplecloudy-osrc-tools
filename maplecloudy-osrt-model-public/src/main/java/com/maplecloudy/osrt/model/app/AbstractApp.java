@@ -14,19 +14,19 @@ import java.util.List;
 public abstract class AbstractApp extends AppLocation {
 
   @Schema(description = "应用的名称")
-  public String name;
+  private String name;
 
   @Schema(description = "应用的类型")
-  public String subType;
+  private String subType;
 
   @Schema(description = "应用的简介，可以是Markdown形式的文档")
-  public String description;
+  private String description;
 
   /**
    * Declares to which version of project descriptor this POM
    * conforms.
    */
-  public String modelVersion;
+  private String modelVersion;
 
   /**
    * The location of the parent project, if one exists. Values
@@ -35,7 +35,7 @@ public abstract class AbstractApp extends AppLocation {
    * they are left unspecified. The location
    *             is given as a group ID, artifact ID and version.
    */
-  public Parent parent;
+  private Parent parent;
 
   /**
    *
@@ -52,7 +52,7 @@ public abstract class AbstractApp extends AppLocation {
    *
    *
    */
-  public String packaging = "jar";
+  private String packaging = "jar";
 
   /**
    *
@@ -67,7 +67,7 @@ public abstract class AbstractApp extends AppLocation {
    *
    *
    */
-  public String url;
+  private String url;
 
   /**
    *
@@ -81,7 +81,7 @@ public abstract class AbstractApp extends AppLocation {
    *
    *
    */
-  public String childInheritAppendPath;
+  private String childInheritAppendPath;
 
   /**
    * The year of the project's inception, specified with 4
@@ -89,7 +89,7 @@ public abstract class AbstractApp extends AppLocation {
    *             used when generating copyright notices as well
    * as being informational.
    */
-  public String inceptionYear;
+  private String inceptionYear;
 
   /**
    * This element describes various attributes of the
@@ -98,64 +98,64 @@ public abstract class AbstractApp extends AppLocation {
    * when documentation is created (for
    *             copyright notices and links).
    */
-  public Organization organization;
+  private Organization organization;
 
   /**
    * Field licenses.
    */
-  public java.util.List<License> licenses;
+  private java.util.List<License> licenses;
 
   /**
    * Field developers.
    */
-  public java.util.List<Developer> developers;
+  private java.util.List<Developer> developers;
 
   /**
    * Field contributors.
    */
-  public java.util.List<Contributor> contributors;
+  private java.util.List<Contributor> contributors;
 
   /**
    * Field mailingLists.
    */
-  public java.util.List<MailingList> mailingLists;
+  private java.util.List<MailingList> mailingLists;
 
   /**
    * Describes the prerequisites in the build environment for
    * this project.
    */
-  public Prerequisites prerequisites;
+  private Prerequisites prerequisites;
 
   /**
    * Specification for the SCM used by the project, such as CVS,
    * Subversion, etc.
    */
-  public Scm scm;
+  private Scm scm;
 
   /**
    * The project's issue management system information.
    */
-  public IssueManagement issueManagement;
+  private IssueManagement issueManagement;
 
   /**
    * The project's continuous integration information.
    */
-  public CiManagement ciManagement;
+  private CiManagement ciManagement;
 
   /**
    * Information required to build the project.
    */
-  public Build build;
+  private Build build;
 
   /**
    * Field profiles.
    */
-  public java.util.List<Profile> profiles;
+  private java.util.List<Profile> profiles;
 
   /**
    * Field modelEncoding.
    */
-  public String modelEncoding = "UTF-8";
+  private String modelEncoding = "UTF-8";
 
   public String getName() {
     return name;
