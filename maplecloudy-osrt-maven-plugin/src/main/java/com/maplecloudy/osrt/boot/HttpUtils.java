@@ -95,6 +95,8 @@ public class HttpUtils {
       if (method.getStatusCode() == HttpStatus.SC_OK) {
         return StreamUtils.copyToString(method.getResponseBodyAsStream(),
             Charset.forName("utf-8"));
+      }else {
+        logger.error("request get " + url + " error！" +method.getResponseBodyAsString());
       }
     } catch (IOException e) {
       logger.error("执行HTTP Get请求" + url + "时，发生异常！", e);
@@ -201,14 +203,15 @@ public class HttpUtils {
     try {
       // 执行postMethod
       int statusCode = httpClient.executeMethod(method);
-      if (method.getStatusCode() == HttpStatus.SC_OK) {
+      if (statusCode == HttpStatus.SC_OK) {
         return StreamUtils.copyToString(method.getResponseBodyAsStream(),
             Charset.forName("utf-8"));
+      }else {
+        logger.error("request Post " + url + " error！" +method.getResponseBodyAsString());
+        //System.out.println(method.getResponseBodyAsString());
       }
-    } catch (UnsupportedEncodingException e1) {
-      logger.error(e1.getMessage());
-    } catch (IOException e) {
-      logger.error("执行HTTP Post请求" + url + "时，发生异常！" + e.toString());
+    } catch (Exception e) {
+      logger.error("request Post " + url + " error！" + e.toString());
     } finally {
       method.releaseConnection();
     }
@@ -236,25 +239,23 @@ public class HttpUtils {
       managerParams.setSoTimeout(30000);
 
       method.setRequestEntity(
-          new StringRequestEntity(reqStr, contentType, "utf-8"));
+          new StringRequestEntity(reqStr, contentType, charset));
 
       client.executeMethod(method);
       logger.info("返回的状态码为" + method.getStatusCode());
       if (method.getStatusCode() == HttpStatus.SC_OK) {
         return StreamUtils.copyToString(method.getResponseBodyAsStream(),
             Charset.forName(charset));
+      }else {
+        logger.error("request Post " + url + " error！" +method.getResponseBodyAsString());
       }
     } catch (UnsupportedEncodingException e1) {
       logger.error(e1.getMessage());
-      return "";
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.error("执行HTTP Post请求" + url + "时，发生异常！" + e.toString());
-
-      return "";
     } finally {
       method.releaseConnection();
     }
-
     return null;
   }
 

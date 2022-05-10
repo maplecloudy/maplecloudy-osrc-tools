@@ -506,6 +506,9 @@ public abstract class Packager {
   }
 
   protected final File getSource() {
+    if (getBackupFile().exists()) {
+      return getBackupFile();
+    }
     return this.source;
   }
 
@@ -755,6 +758,14 @@ public abstract class Packager {
       }
 
     }
+
+  }
+
+  public static void main(String[] args) {
+    File file = new File(
+        "D:\\0_code\\github\\mall\\mall-admin\\target\\mall-admin-1"
+            + ".0-SNAPSHOT-osrc-app.jar");
+    System.out.println(file.getAbsolutePath());
 
   }
 

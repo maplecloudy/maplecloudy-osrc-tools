@@ -2,25 +2,24 @@ package com.maplecloudy.osrt.boot.maven;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.Lists;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.Maps;
 import com.maplecloudy.osrt.boot.HttpUtils;
+import com.maplecloudy.osrt.model.app.App;
 import com.maplecloudy.osrt.model.app.Config;
-import com.maplecloudy.osrt.model.basic.OsrtProjectConfig;
 import com.maplecloudy.osrt.model.basic.Scope;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.*;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -35,6 +34,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.apache.maven.shared.transfer.project.install.ProjectInstallerRequest;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.util.ObjectUtils;
 
 import java.io.File;
@@ -136,7 +136,6 @@ public class InstallOsrtAppMojo extends AbstractMojo {
   private static ObjectMapper om = new ObjectMapper();
   private Map<String,Object> userMap = new HashMap<>();
   private Map<String,Object> projectMap = new HashMap<>();
-  private OsrtProjectConfig prjConfig = new OsrtProjectConfig();
 
   {
     om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -144,6 +143,10 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     om.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
   }
+
+  private App app = new App();
+
+  private Config config = new Config();
 
   private void installProject()
       throws MojoFailureException, MojoExecutionException {
@@ -166,13 +169,7 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         getLog().info("install osrt skip Pom Artifact!");
         return;
       }
-      // else {
-      //
-      // if (pomFile != null) {
-      // metadata = new ProjectArtifactMetadata(artifact, pomFile);
-      // artifact.addMetadata(metadata);
-      // }
-      // }
+
       JarFile targerJar = null;
       PostMethod m = null;
       GetMethod mg = null;
@@ -183,94 +180,95 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         HttpClient hc = new HttpClient();
         hc.getParams().setParameter("http.useragent",
             "Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)");
-        String osrtAppSite = System.getenv("OSRT_APP_SITE");
-        String osrtAppToken = System.getenv("OSRT_APP_TOKEN");
+        Header header = new Header();
+        Scanner sc = new Scanner(System.in);
         File osrcFile = new File(SystemUtils.getUserHome(), ".osrc");
-        boolean exists = osrcFile.exists();
-        Config config = null;
-        if (exists) {
-          config = om.readValue(osrcFile, Config.class);
-        }
-        if (StringUtils.isBlank(osrtAppSite)) {
-          if (!ObjectUtils.isEmpty(config) && !ObjectUtils.isEmpty(
-              config.getRemote())) {
-            osrtAppSite = config.getRemote();
-          } else {
-            config = new Config();
-            config.setRemote("https://www.osrc.com");
-            osrtAppSite = config.getRemote();
-          }
-        }
-        if (StringUtils.isBlank(osrtAppToken)) {
-          if (!ObjectUtils.isEmpty(config) && !ObjectUtils.isEmpty(
-              config.getAccessToken())) {
-            osrtAppToken = config.getAccessToken();
-          }
-        }
-        Header header = new Header("Authorization", "Bearer " + osrtAppToken);
-        if (ObjectUtils.isEmpty(osrtAppToken)) {
-          boolean flag = checkLoginInfo(osrtAppSite, header, hc, target);
-          if (!flag) {
-            return;
-          }
-        } else {
-          // verify token
-          mg = new GetMethod(osrtAppSite + "/api/users");
-          mg.addRequestHeader(header);
-          int mgRespStatus = hc.executeMethod(mg);
-          if (mgRespStatus == 200) {
-            Map map = om.readValue(mg.getResponseBody(), Map.class);
-            userMap = map;
-            String username = map.get("username").toString();
-            getLog().info(
-                "The installation will be performed under username: " + username
-                    + "!");
-          } else if (mgRespStatus == 401) {
-            getLog().error("Token expired!please try to login!");
-            boolean flag = checkLoginInfo(osrtAppSite, header, hc, target);
-            if (!flag) {
-              return;
-            }
-          } else {
-            getLog().error("Failed to obtain user information! ");
-            getLog().error(
-                "failed with code: " + mgRespStatus + ",error message:"
-                    + mg.getResponseBodyAsString());
-            boolean flag = checkLoginInfo(osrtAppSite, header, hc, target);
-            if (!flag) {
-              return;
-            }
-          }
-        }
-
-        //校验.osrc/config.json文件,如果不通过,直接返回
-        boolean checkProjectValid = checkProjectConfig(osrtAppSite, header);
-        if (!checkProjectValid) {
+        boolean osrcFileValid = checkOsrcFileValid(osrcFile, header, sc);
+        if (!osrcFileValid) {
           return;
         }
-
         targerJar = new JarFile(target);
         //app check
         JarEntry indexEntry = targerJar.getJarEntry("index.yml");
         if (indexEntry == null) {
-          getLog().error("install osrt skip package not have [index.yml]!");
+          getLog().error("install osrt skip! Package not have [index.yml]!");
           return;
         }
+
+        ObjectMapper yaml = new ObjectMapper(new YAMLFactory());
+        yaml.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        yaml.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        yaml.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        JsonNode jsonNode = yaml.readTree(targerJar.getInputStream(indexEntry));
+        app = om.convertValue(jsonNode, App.class);
+        //todo 根据bundle信息,判断project是新增还是update
+
+        Map<String,Object> bundleMap = Maps.newHashMap();
+        bundleMap.put("version", app.getVersion());
+        bundleMap.put("bundleStr", getBundleStr(app.getBundle()));
+        bundleMap.put("type", config.getScope().getType());
+        bundleMap.put("scopeId", Integer.valueOf(config.getScope().getId()));
+        boolean checkPrInfoFlag = true;
+        while (checkPrInfoFlag) {
+          getLog().info("Check project info......");
+          String prBundlStr = HttpUtils.doGet(
+              config.getRemote() + "/api/projects/app-deploy", bundleMap,
+              header);
+          if (ObjectUtils.isEmpty(prBundlStr)) {
+            getLog().error("Got project bundle data error!");
+            return;
+          } else {
+            projectMap = om.readValue(prBundlStr, Map.class);
+          }
+          boolean exist = Boolean.valueOf(projectMap.get("exist").toString());
+          if (exist) {
+            //todo 昵称还是username? name还是displayName
+            String ownerName = projectMap.get("ownerName").toString();
+            String prjName = projectMap.get("name").toString();
+            boolean linkFlag = true;
+            while (linkFlag) {
+              getLog().info(
+                  "Found project “" + ownerName + "/" + prjName + "”. Link to "
+                      + "it? [Y/n]");
+              String yn = sc.nextLine();
+              if ("y".equalsIgnoreCase(yn)) {
+                checkPrInfoFlag = false;
+                linkFlag = false;
+              } else if ("n".equalsIgnoreCase(yn)) {
+                //1. 确定scope
+                //Scope scope = initScope(sc, config.getRemote(), header);
+                //config.setScope(scope);
+                initProject(sc, config.getRemote(), header);
+                linkFlag = false;
+              } else {
+                continue;
+              }
+            }
+          } else {
+            //todo add project
+            getLog().info("Project init ......");
+            initProject(sc, config.getRemote(), header);
+            checkPrInfoFlag = false;
+          }
+        }
+
         FilePart indexFilePart = executeAppCheck(targerJar, target, hc,
-            osrtAppSite, header, indexEntry);
+            config.getRemote(), header, indexEntry);
         if (indexFilePart == null) {
           return;
         }
 
-        getLog().info("***********" + om.writeValueAsString(prjConfig));
         //app install
-        m = new PostMethod(osrtAppSite + "/api/apps/install-app-file");
+        m = new PostMethod(
+            config.getRemote() + "/api/apps/install-app-file" + "?projectId="
+                + projectMap.get("projectId").toString());
         m.addRequestHeader(header);
-        StringPart stringPart = new StringPart("projectConfig",
-            om.writeValueAsString(prjConfig));
-        stringPart.setContentType("application/json");
-        Part[] parts = {indexFilePart, new FilePart("appFile", target),
-            stringPart};
+        Part[] parts = {indexFilePart, new FilePart("appFile", target)};
+        //StringPart stringPart = new StringPart("projectConfig",
+        //    om.writeValueAsString(prjConfig));
+        //stringPart.setContentType("application/json");
+        //Part[] parts = {indexFilePart, new FilePart("appFile", target),
+        //    stringPart};
 
         MultipartRequestEntity mre = new MultipartRequestEntity(parts,
             m.getParams());
@@ -301,7 +299,172 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     } catch (Exception e) {
       throw new MojoFailureException("Exception", e);
     }
+  }
 
+  /**
+   * 校验osrcFile的内容
+   * 1. 如果.osrc不存在,则初始化登录信息和scope信息,并创建.osrc文件
+   * 2. 如果.osrc文件存在,则校验文件中的登录信息和scope信息
+   *
+   * @param osrcFile
+   * @param header
+   * @param sc
+   * @return
+   * @throws Exception
+   */
+  private boolean checkOsrcFileValid(File osrcFile, Header header, Scanner sc)
+      throws Exception {
+    //1.初始化.osrc文件
+    String osrtAppSite = null;
+    if (!osrcFile.exists()) {
+      //osrtAppSite = "https://www.osrc.com";
+      osrtAppSite = "https://www.maplecloudy.com";
+      boolean initLoginInfoSuccess = initLoginInfoSuccess(config, osrtAppSite,
+          header, sc);
+      if (!initLoginInfoSuccess) {
+        return false;
+      }
+      Scope scope = initScope(sc, osrtAppSite, header);
+      config.setScope(scope);
+      om.writeValue(osrcFile, config);
+      return true;
+    } else {
+      //2. 校验.osrc文件内容
+      Config osrcConfig = om.readValue(osrcFile, Config.class);
+      if (ObjectUtils.isEmpty(osrcConfig.getRemote())) {
+        //osrtAppSite = "https://www.osrc.com";
+        osrtAppSite = "https://www.maplecloudy.com";
+        osrcConfig.setRemote(osrtAppSite);
+      }
+      //校验logininfo
+      if (ObjectUtils.isEmpty(osrcConfig) || ObjectUtils.isEmpty(
+          osrcConfig.getRemote()) || ObjectUtils.isEmpty(
+          osrcConfig.getAccessToken()) || ObjectUtils.isEmpty(
+          osrcConfig.getUsername())) {
+        boolean initLoginInfoSuccess = initLoginInfoSuccess(osrcConfig,
+            osrcConfig.getRemote(), header, sc);
+        if (!initLoginInfoSuccess) {
+          return false;
+        } else {
+          om.writeValue(osrcFile, osrcConfig);
+        }
+      } else {
+        header.setName("Authorization");
+        header.setValue("Bearer " + osrcConfig.getAccessToken());
+        boolean checkLoginTokenValid = checkLoginTokenValid(
+            osrcConfig.getRemote(), header);
+        if (!checkLoginTokenValid) {
+          boolean initLoginInfoSuccess = initLoginInfoSuccess(osrcConfig,
+              osrcConfig.getRemote(), header, sc);
+          if (!initLoginInfoSuccess) {
+            return false;
+          } else {
+            om.writeValue(osrcFile, osrcConfig);
+          }
+        }
+      }
+      //校验scope
+      Scope scope = osrcConfig.getScope();
+      if (ObjectUtils.isEmpty(scope) || ObjectUtils.isEmpty(scope.getId())
+          || ObjectUtils.isEmpty(scope.getType())) {
+        scope = initScope(sc, osrcConfig.getRemote(), header);
+        osrcConfig.setScope(scope);
+        om.writeValue(osrcFile, osrcConfig);
+      } else {
+        boolean checkScopeValid = checkScopeValid(osrcConfig.getRemote(), scope,
+            header, sc);
+        if (!checkScopeValid) {
+          scope = initScope(sc, osrcConfig.getRemote(), header);
+          osrcConfig.setScope(scope);
+          om.writeValue(osrcFile, osrcConfig);
+        }
+      }
+      config = osrcConfig;
+      return true;
+    }
+  }
+
+  private boolean checkScopeValid(String osrtAppSite, Scope scope,
+      Header header, Scanner sc) throws JsonProcessingException {
+    Map<String,Object> maps = new HashMap();
+    maps.put("scopeId", Integer.valueOf(scope.getId()));
+    maps.put("type", scope.getType());
+
+    String accessStr = HttpUtils.doGet(osrtAppSite + "/api/users/deploy/access",
+        maps, header);
+    if (ObjectUtils.isEmpty(accessStr)) {
+      getLog().error("Scope data error! Please init the scope data again!");
+      return false;
+    }
+    return true;
+  }
+
+  private boolean checkLoginTokenValid(String osrtAppSite, Header header)
+      throws JsonProcessingException {
+    String userInfoStr = HttpUtils.doGet(osrtAppSite + "/api/users", null,
+        header);
+    if (ObjectUtils.isEmpty(userInfoStr)) {
+      getLog().error("Token expired or invalid!please try to login again!");
+      return false;
+    } else {
+      userMap = om.readValue(userInfoStr, Map.class);
+      return true;
+    }
+  }
+
+  private boolean initLoginInfoSuccess(Config config, String osrtAppSite,
+      Header header, Scanner sc) throws JsonProcessingException {
+    String username = null;
+    while (true) {
+      getLog().info("please login (y/n)? ");
+      String yn = sc.nextLine();
+      if ("y".equalsIgnoreCase(yn) || "yes".equalsIgnoreCase(yn)) {
+        getLog().info("please input the username: ");
+        username = sc.nextLine();
+        getLog().info("please input the password: ");
+        String password = sc.nextLine();
+        Map<String,Object> mapPara = Maps.newHashMap();
+        mapPara.put("username", username);
+        mapPara.put("password", password);
+        String userTokenStr = HttpUtils.doPost(
+            osrtAppSite + "/api/users/signin", om.writeValueAsString(mapPara),
+            "application/json", "UTF-8");
+
+        getLog().info("****" + userTokenStr);
+        if (StringUtils.isNotBlank(userTokenStr)) {
+          getLog().info("login successfully!");
+          getLog().info(
+              "The installation will be performed under username: " + username
+                  + "!");
+          Map tokenMap = om.readValue(userTokenStr, Map.class);
+          String token = tokenMap.get("accessToken").toString();
+          config.setAccessToken(token);
+          config.setUsername(username);
+          config.setTokenType(tokenMap.get("tokenType").toString());
+          config.setRemote(osrtAppSite);
+          header.setName("Authorization");
+          header.setValue("Bearer " + token);
+          String userInfoStr = HttpUtils.doGet(osrtAppSite + "/api/users", null,
+              header);
+          getLog().info("****" + userInfoStr);
+          if (ObjectUtils.isEmpty(userInfoStr)) {
+            getLog().error(
+                "Token expired or invalid!please try to login again!");
+            continue;
+          } else {
+            userMap = om.readValue(userInfoStr, Map.class);
+          }
+          return true;
+        } else {
+          continue;
+        }
+      } else if ("n".equalsIgnoreCase(yn) || "no".equalsIgnoreCase(yn)) {
+        getLog().info("Skipping install osrt app");
+        return false;
+      } else {
+        continue;
+      }
+    }
   }
 
   private FilePart executeAppCheck(JarFile targerJar, File target,
@@ -355,259 +518,62 @@ public class InstallOsrtAppMojo extends AbstractMojo {
             .getArtifactHandler().getExtension());
   }
 
-  public void setSkip(boolean skip) {
-    this.skip = skip;
-  }
-
-  public boolean checkLoginInfo(String osrtAppSite, Header header,
-      HttpClient hc, File target) throws Exception {
-    Scanner sc = new Scanner(System.in);
-    PostMethod m = null;
-    String username = null;
-    while (true) {
-      getLog().info("please login (y/n)? ");
-      String yn = sc.nextLine();
-      if ("y".equalsIgnoreCase(yn) || "yes".equalsIgnoreCase(yn)) {
-        getLog().info("please input the username: ");
-        username = sc.nextLine();
-        getLog().info("please input the password: ");
-        String password = sc.nextLine();
-        m = new PostMethod(osrtAppSite + "/api/users/signin");
-        Map<String,String> mapPara = Maps.newHashMap();
-        mapPara.put("username", username);
-        mapPara.put("password", password);
-        String userInfoStr = om.writeValueAsString(mapPara);
-        RequestEntity entity = new StringRequestEntity(userInfoStr,
-            "application/json", "UTF-8");
-        m.setRequestEntity(entity);
-        int code = hc.executeMethod(m);
-        if (code == 200) {
-          getLog().info("login successfully!");
-          getLog().info(
-              "The installation will be performed under username: " + username
-                  + "!");
-          Map tokenMap = om.readValue(m.getResponseBody(), Map.class);
-          String token = tokenMap.get("accessToken").toString();
-          Config config = new Config();
-          config.setAccessToken(token);
-          config.setUsername(username);
-          config.setTokenType(tokenMap.get("tokenType").toString());
-          config.setRemote(osrtAppSite);
-          File osrcFile = new File(SystemUtils.getUserHome(), ".osrc");
-          om.writeValue(osrcFile, config);
-          header.setName("Authorization");
-          header.setValue("Bearer " + token);
-          GetMethod mg = new GetMethod(osrtAppSite + "/api/users");
-          mg.addRequestHeader(header);
-          int mgRespStatus = hc.executeMethod(mg);
-          if (mgRespStatus == 200) {
-            Map map = om.readValue(mg.getResponseBody(), Map.class);
-            userMap = map;
-            username = map.get("username").toString();
-            getLog().info(
-                "The installation will be performed under username: " + username
-                    + "!");
-          }
-          break;
-        } else if (code == 401) {
-          getLog().error("Token expired!please try to login!");
-        } else {
-          getLog().error(
-              "install osrt file:" + target + " failed with code: " + code
-                  + ",error message:" + m.getResponseBodyAsString());
-        }
-      } else if ("n".equalsIgnoreCase(yn) || "no".equalsIgnoreCase(yn)) {
-        getLog().info("Skipping install osrt app");
-        return false;
-      } else {
-        continue;
-      }
-    }
-    return true;
-  }
-
-  public boolean checkProjectConfig(String osrtAppSite, Header header)
-      throws Exception {
-    File file = new File(".osrc/config.json");
-    Scanner sc = new Scanner(System.in);
-    if (!file.exists()) {
-      if (file.getParentFile() != null && !file.getParentFile().exists()) {
-        file.getParentFile().mkdirs();
-      }
-      file.createNewFile();
-      //1. 确定scope
-      Scope scope = initScope(sc, osrtAppSite, header);
-      //2. 确定projectId
-      String projectId = initProject(sc, scope, osrtAppSite, header);
-      prjConfig.setProjectId(projectId);
-      prjConfig.setScope(scope);
-      om.writeValue(file, prjConfig);
-
-      return true;
-      //config.json文件存在
-    } else {
-      //2. 确定project
-      boolean configValid = checkProjectJsonFileValid(osrtAppSite, file,
-          header);
-      if (!configValid) {
-        //1. 确定scope
-        Scope scope = initScope(sc, osrtAppSite, header);
-        //2. 确定projectId
-        String projectId = initProject(sc, scope, osrtAppSite, header);
-        prjConfig.setProjectId(projectId);
-        prjConfig.setScope(scope);
-        om.writeValue(file, prjConfig);
-        return true;
-      } else {
-        String ownerName = projectMap.get("ownerName").toString();
-        String prjName = projectMap.get("name").toString();
-        getLog().info(
-            "Found project “" + ownerName + "/" + prjName + "”. Link to "
-                + "it? [Y/n]");
-        String yn = sc.nextLine();
-        while (true) {
-          if ("y".equalsIgnoreCase(yn)) {
-            prjConfig = om.readValue(file, OsrtProjectConfig.class);
-            return true;
-          } else if ("n".equalsIgnoreCase(yn)) {
-            //1. 确定scope
-            Scope scope = initScope(sc, osrtAppSite, header);
-            //2. 确定projectId
-            String projectId = initProject(sc, scope, osrtAppSite, header);
-            prjConfig.setProjectId(projectId);
-            prjConfig.setScope(scope);
-            om.writeValue(file, prjConfig);
-            return true;
-          } else {
-            continue;
-          }
-        }
-      }
-    }
-  }
-
-  private boolean checkProjectJsonFileValid(String osrtAppSite, File file,
-      Header header) throws IOException {
-    //校验文件内容
-    OsrtProjectConfig checkPrjConfig = om.readValue(file,
-        OsrtProjectConfig.class);
-    if (ObjectUtils.isEmpty(checkPrjConfig) || ObjectUtils.isEmpty(
-        checkPrjConfig.getProjectId())) {
-      return false;
-    }
-    Scope scope = checkPrjConfig.getScope();
-    String scopeType = scope.getType();
-    String scopeId = scope.getId();
-    if (ObjectUtils.isEmpty(scope) || ObjectUtils.isEmpty(scopeId)
-        || ObjectUtils.isEmpty(scopeType)) {
-      return false;
-    }
-
-    Map<String,Object> maps = new HashMap();
-    maps.put("id", checkPrjConfig.getProjectId());
-    maps.put("scopeId", Integer.valueOf(scope.getId()));
-    maps.put("type", scopeType);
-    String projectStr = HttpUtils.doGet(osrtAppSite + "/api/projects/check",
-        maps, header);
-    if (ObjectUtils.isEmpty(projectStr)) {
-      getLog().error(
-          "Your Project was either deleted, transferred to a new Team, or you don’t have access to it anymore");
-      return false;
-    }
-    projectMap = om.readValue(projectStr, Map.class);
-    //Integer ownerId = Integer.valueOf(projectMap.get("ownerId").toString());
-    //Integer ownerType = Integer.valueOf(projectMap.get("ownerType").toString());
-    //if (ownerType == 0) {
-    //  if (!StringUtils.equals(scopeType, "user")) {
-    //    return false;
-    //  } else {
-    //    //校验所属者
-    //    if (!ownerId.equals(Integer.valueOf(scopeId))) {
-    //      return false;
-    //    }
-    //  }
-    //} else if (ownerType == 1) {
-    //  if (!StringUtils.equals(scopeType, "team")) {
-    //    return false;
-    //  } else {
-    //    //校验所属者
-    //    if (!ownerId.equals(Integer.valueOf(scopeId))) {
-    //      return false;
-    //    }
-    //    //todo type为team时,上传者的team权限校验
-    //    Map<String,Object> teamCheckPara = new HashMap();
-    //    teamCheckPara.put("id", ownerId);
-    //    String respStr = HttpUtils.doGet(osrtAppSite + "/api/users/team/access",
-    //        teamCheckPara, header);
-    //    Map map = om.readValue(respStr, Map.class);
-    //    if (200 != (Integer) map.get("code")) {
-    //      getLog().error(
-    //          "Your Project was either deleted, transferred to a new Team, or you don’t have access to it anymore");
-    //      return false;
-    //    }
-    //  }
-    //}
-    return true;
-  }
-
   private Scope initScope(Scanner sc, String osrtAppSite, Header header)
       throws JsonProcessingException {
     Scope scope = new Scope();
     while (true) {
       getLog().info("Which scope do you want to deploy to? \n 1 "
-          + "personal account \n 2 teams" + " ");
-      String type = sc.nextLine();
-
-      if (StringUtils.equals("1", type)) {
+          + "personal account \n 2 organization" + " ");
+      int type = sc.nextInt();
+      if (type == 1) {
         scope.setType("user");
         scope.setId(userMap.get("id").toString());
         break;
-      } else {
-        //查询返回当前的user所在的有上传权限的team的name
-        String teamsStr = HttpUtils.doGet(osrtAppSite + "/api/users/teams",
-            null, header);
-        getLog().error("*********"+teamsStr);
-       if(ObjectUtils.isEmpty(teamsStr)) {
-          getLog().error("Your have not join any team,or you don’t have access"
-              + " to the deploy access anymore ");
+      } else if (type == 2) {
+        //查询返回当前的user所在的有上传权限的org
+        String countStr = HttpUtils.doGet(
+            osrtAppSite + "/api/organizations/count", null, header);
+        if (ObjectUtils.isEmpty(countStr) || Integer.valueOf(countStr) == 0) {
+          getLog().warn("Your have not join any organization!");
           continue;
         } else {
-         List<Map<String,Object>> teamMapList = om.readValue(teamsStr,
-             new TypeReference<List<Map<String,Object>>>() {
-             });
-          List<String> tnames = Lists.newArrayList();
-          Map<String,Object> teamMap = new HashMap<>();
-          teamMapList.forEach(m -> {
-            String name = m.get("teamName").toString();
-            tnames.add(name);
-            teamMap.put(name, m.get("teamId"));
-          });
-          //控制台展示所有的team name
-         String joinWith = StringUtils.joinWith("\n", tnames);
-         getLog().info("Your teams: \n"+joinWith);
-          //tnames.forEach(m -> {
-          //  getLog().info( " "+m + "\n");
-          //});
           while (true) {
-            getLog().info("please input the team name: ");
-            String tname = sc.nextLine();
-            if (!tnames.contains(tname)) {
-              getLog().error("name not exists!");
+            getLog().info("please input the organization name: ");
+            String orgName = sc.nextLine();
+            Map<String,Object> nameMap = new HashMap<>();
+            nameMap.put("name", orgName);
+            String memberRoleStr = HttpUtils.doGet(
+                osrtAppSite + "/api/organizations/role", nameMap, header);
+            if (ObjectUtils.isEmpty(memberRoleStr)) {
+              getLog().warn(
+                  "You are not the organization member, or you don’t have "
+                      + "access to the deploy anymore ");
               continue;
             } else {
-              scope.setType("team");
-              scope.setId(teamMap.get(tname).toString());
-              break;
+              //todo 简单设计,只有org中的owener可以deploy;应该校验当前的user是否有deploy access
+              Map map = om.readValue(memberRoleStr, Map.class);
+              Integer orgId = Integer.valueOf(map.get("orgId").toString());
+              String accessRole = map.get("accessRole").toString();
+              if (!StringUtils.equalsIgnoreCase(accessRole, "owner")) {
+                getLog().warn("You don’t have the access to deploy");
+                continue;
+              } else {
+                scope.setType("organization");
+                scope.setId(orgId.toString());
+                break;
+              }
             }
           }
           break;
         }
+      } else {
+        continue;
       }
     }
     return scope;
   }
 
-  private String initProject(Scanner sc, Scope scope, String osrtAppSite,
+  private String initProject(Scanner sc, String osrtAppSite,
       Header header) throws JsonProcessingException {
     String projectId = null;
     while (true) {
@@ -619,13 +585,22 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         getLog().info("What’s the name of your existing project?");
         String projectName = sc.nextLine();
         nameMap.put("name", projectName);
-        nameMap.put("scopeId", Integer.valueOf(scope.getId()));
-        nameMap.put("type", scope.getType());
-        String prjStr = HttpUtils.doGet(osrtAppSite + "/api/projects/check",
-            nameMap, header);
+        nameMap.put("scopeId", Integer.valueOf(config.getScope().getId()));
+        nameMap.put("type", config.getScope().getType());
+        String prjStr = HttpUtils.doGet(
+            osrtAppSite + "/api/projects/check", nameMap, header);
         if (StringUtils.isNotBlank(prjStr)) {
-          projectMap = om.readValue(prjStr, Map.class);
-          projectId = projectMap.get("id").toString();
+          Map<String,Object> prjMap = om.readValue(prjStr, Map.class);
+          projectMap.put("projectId", prjMap.get("id"));
+          projectMap.put("name", prjMap.get("name"));
+
+          Map<String,Object> map = Maps.newHashMap();
+          map.put("scopeId", Integer.valueOf(config.getScope().getId()));
+          map.put("type", config.getScope().getType());
+          map.put("projectId", prjMap.get("id"));
+          map.put("bundleStr", getBundleStr(app.getBundle()));
+          HttpUtils.doPost(osrtAppSite + "/api/projects/app-bundle", map,
+              header);
           break;
         } else {
           getLog().warn("Project not exists,or you have no access!");
@@ -636,16 +611,19 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         getLog().info("What’s your project’s name?");
         String projectName = sc.nextLine();
         nameMap.put("name", projectName);
-        nameMap.put("scopeId", Integer.valueOf(scope.getId()));
-        nameMap.put("type", scope.getType());
-        String prjStr = HttpUtils.doPost(osrtAppSite + "/api/projects/add",
+        nameMap.put("bundleStr", getBundleStr(app.getBundle()));
+        nameMap.put("scopeId", Integer.valueOf(config.getScope().getId()));
+        nameMap.put("type", config.getScope().getType());
+        String prjStr = HttpUtils.doPost(osrtAppSite + "/api/projects/app-add",
             nameMap, header);
         if (StringUtils.isNotBlank(prjStr)) {
-          projectMap = om.readValue(prjStr, Map.class);
-          projectId = projectMap.get("id").toString();
+          Map<String,Object> prjMap = om.readValue(prjStr, Map.class);
+          projectMap.put("projectId", prjMap.get("id"));
+          projectMap.put("name", prjMap.get("name"));
           break;
         } else {
-          getLog().info("Project already exists! ");
+          getLog().info("Project already exists! Or you have to cancel the "
+              + "bundle relations ");
           continue;
         }
       } else {
@@ -656,55 +634,32 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     return projectId;
   }
 
-  public static void main(String[] args) throws IOException {
-    String osrtAppSite = "http://localhost:16891";
-    String osrtAppToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTAwNDgyMDMsInVzZXJfbmFtZSI6Im9zcmMiLCJhdXRob3JpdGllcyI6WyJ1c2VyIl0sImp0aSI6InIzWE5IbF9QaFNsZml6Znd2NWdDVTZOaUVJOCIsImNsaWVudF9pZCI6Im1hcGxlY2xvdWR5Iiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl19.AxB_QPHs5-FQ-au5U3nmKEjzt8yfsM5M4Jc6n55o2dMv6AslsCUI-k_XAaf0ahsxDFM4eflYH0k0dQFsRg79Tv-dixiX9Xh_U28VOpYC6Cg8edEY9BZVOOtwG5Y_y57K6m8Esf6_4DqcXGz_miV1N0HMdykDaPQz6o2cVdQFtQWSPVc4C4jRjKzFKvjCInH2GrqKMkZRsEySpQUwA0zI-_tklgmYerefyOQ1ErVNGeDjT3BX9WZFpAp4mUXvcRG0-xcjqo0zwbrpvqhWCMW2k4hK7qHlSTTVkst9MCekQTxwAesLMMERwCRpZLoXLhntFva1pOPpjP1wWCp8hHdSkA";
-    HttpClient hc = new HttpClient();
-    hc.getParams().setParameter("http.useragent",
-        "Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)");
-    Header header = new Header("Authorization", "Bearer " + osrtAppToken);
-    GetMethod check = new GetMethod(osrtAppSite + "/api/projects/check");
-
-    HttpMethodParams methodParams = new HttpMethodParams();
-    methodParams.setParameter("id", "project_765260450064130048");
-    check.setParams(methodParams);
-    NameValuePair valuePair = new NameValuePair("id",
-        "project_765260450064130048");
-    check.setQueryString(new NameValuePair[] {valuePair});
-
-    check.addRequestHeader(header);
-
-    //int code = hc.executeMethod(check);
-    //
-    //System.out.println(check.getResponseBodyAsString());
-
-    HashMap<String,Object> stringHashMap = new HashMap<>();
-    stringHashMap.put("id", "project_765260450064130048");
-
-
-    PostMethod httpPost = new PostMethod(
-        osrtAppSite + "/api/apps/install-app-file");
-    httpPost.addRequestHeader(header);
-    StringPart stringPart = new StringPart("projectConfig",
-        "{\"projectId\":\"project_775024354616819712\","
-            + "\"scope\":{\"type\":\"user\",\"id\":\"2\"}}");
-    stringPart.setContentType("application/json");
-    FilePart filePart = new FilePart("index",
-        new File("C:\\Users\\Parker\\Desktop\\index.yml"),
-        FilePart.DEFAULT_CONTENT_TYPE, StandardCharsets.UTF_8.name());
-    Part[] parts = {filePart, stringPart};
-    MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts,
-        new HttpMethodParams());
-    httpPost.setRequestEntity(requestEntity);
-    hc.executeMethod(httpPost);
-    System.out.println(httpPost.getResponseBodyAsString());
-
-
-    List<Map<String,Object>> teamMapList = om.readValue("[]",
-        new TypeReference<List<Map<String,Object>>>() {
-        });
-
-    System.out.println(teamMapList);
-
+  private String getBundleStr(List<String> bundle) {
+    if (!ObjectUtils.isEmpty(bundle)) {
+      String[] toArray = bundle.toArray(new String[bundle.size()]);
+      String bundleStr = String.join("/", toArray);
+      return bundleStr;
+    }
+    return null;
   }
+
+  public static void main(String[] args) {
+    String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTIyMDk4NTcsInVzZXJfbmFtZSI6ImNwZiIsImF1dGhvcml0aWVzIjpbInVzZXIiXSwianRpIjoiSmdCcjhCcGJlWkNaVVg3cjVmdDg1V1A3X2lFIiwiY2xpZW50X2lkIjoibWFwbGVjbG91ZHkiLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXX0.OC9SUwDeMB2Pkk5falmF4riBjHtbu-muvO8iB5qxJgZU70CePGVgLAn6R5PCwZm-F5XyXDbYQ2csJcrGzZXQ_E6KeHPeT3OmWnnLNXBQDxR6KnOsy-mt6gRVh1JvChkK4gp_s08ybMFUzSnzXbCfI40oSmbg6F34RQSQ4qLROgLxCqzocrqQHtTjW2nS2AhmiMZkRxfDzxaB-DTMkUKFMixjkaiclJDR5oMX9yjPoQThBQr-ti3c87dOHB8xpdoncvTX6syFd3rLBqx9nIs7Z8dOfJb7F4_D6pXCfd8TVDNyPBYsw1tZfvPzvmCRHeuz2LunNiM6FRniR2bl4jdyIw";
+    Header header = new Header();
+    header.setName("Authorization");
+    header.setValue("Bearer " + token);
+
+    HashMap<String, Object> nameMap = new HashMap<>();
+    nameMap.put("name", "fdsaf");
+    nameMap.put("bundleStr","com.macro.mall/mall-admin");
+    nameMap.put("scopeId", "26");
+    nameMap.put("type", "user");
+    String prjStr = HttpUtils.doPost("http://localhost:16891" + "/api/projects"
+            + "/app"
+            + "-add",
+        nameMap, header);
+
+    System.out.println(prjStr);
+  }
+
 }

@@ -1,14 +1,23 @@
 package com.maplecloudy.osrt.model.app;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.maplecloudy.osrt.model.basic.Scope;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * @author cpf
  * @create 2022-01-04
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Config {
   private String remote;
   private String username;
   private String accessToken;
   private String tokenType;
+  @Schema(description = "deploy的目标,user/org")
+  private Scope scope;
 
   public String getRemote() {
     return remote;
@@ -40,5 +49,13 @@ public class Config {
 
   public void setTokenType(String tokenType) {
     this.tokenType = tokenType;
+  }
+
+  public Scope getScope() {
+    return scope;
+  }
+
+  public void setScope(Scope scope) {
+    this.scope = scope;
   }
 }
