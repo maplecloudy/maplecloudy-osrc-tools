@@ -573,8 +573,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     return scope;
   }
 
-  private String initProject(Scanner sc, String osrtAppSite,
-      Header header) throws JsonProcessingException {
+  private String initProject(Scanner sc, String osrtAppSite, Header header)
+      throws JsonProcessingException {
     String projectId = null;
     while (true) {
       getLog().info("Link to existing project? [Y/n]");
@@ -587,8 +587,8 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         nameMap.put("name", projectName);
         nameMap.put("scopeId", Integer.valueOf(config.getScope().getId()));
         nameMap.put("type", config.getScope().getType());
-        String prjStr = HttpUtils.doGet(
-            osrtAppSite + "/api/projects/check", nameMap, header);
+        String prjStr = HttpUtils.doGet(osrtAppSite + "/api/projects/check",
+            nameMap, header);
         if (StringUtils.isNotBlank(prjStr)) {
           Map<String,Object> prjMap = om.readValue(prjStr, Map.class);
           projectMap.put("projectId", prjMap.get("id"));
@@ -608,8 +608,19 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         }
         //新增
       } else if ("n".equalsIgnoreCase(yn)) {
-        getLog().info("What’s your project’s name?");
-        String projectName = sc.nextLine();
+        String projectName;
+        while (true) {
+          getLog().info("What’s your project’s name?");
+          getLog().info("(project name can only consist of up to 100 "
+              + "aiphanumeric lowercase characters.Hyphens can be used in "
+              + "between the name,but never at the start or end.)");
+          projectName = sc.nextLine().toLowerCase();
+          if (!projectName.matches("^(?!-)(?!.*?-$)[a-zA-Z0-9-]{1,100}$")) {
+            getLog().warn("wrong input format!");
+            continue;
+          }
+          break;
+        }
         nameMap.put("name", projectName);
         nameMap.put("bundleStr", getBundleStr(app.getBundle()));
         nameMap.put("scopeId", Integer.valueOf(config.getScope().getId()));
@@ -649,15 +660,14 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     header.setName("Authorization");
     header.setValue("Bearer " + token);
 
-    HashMap<String, Object> nameMap = new HashMap<>();
+    HashMap<String,Object> nameMap = new HashMap<>();
     nameMap.put("name", "fdsaf");
-    nameMap.put("bundleStr","com.macro.mall/mall-admin");
+    nameMap.put("bundleStr", "com.macro.mall/mall-admin");
     nameMap.put("scopeId", "26");
     nameMap.put("type", "user");
-    String prjStr = HttpUtils.doPost("http://localhost:16891" + "/api/projects"
-            + "/app"
-            + "-add",
-        nameMap, header);
+    String prjStr = HttpUtils.doPost(
+        "http://localhost:16891" + "/api/projects" + "/app" + "-add", nameMap,
+        header);
 
     System.out.println(prjStr);
   }

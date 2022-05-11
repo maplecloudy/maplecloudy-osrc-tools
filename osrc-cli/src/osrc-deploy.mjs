@@ -196,12 +196,15 @@ async function bundleProject(appInfo, projectsBundleInfo) {
         await addProjectsPageBundleRelations(projects.id, appInfo.bundleStr)
     } else if (choose === 'n') {
         console.log("What’s your project’s name?")
+        console.log("(project name can only consist of up to 100 "
+            + "aiphanumeric lowercase characters.Hyphens can be used in "
+            + "between the name,but never at the start or end.)")
         const {name} = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'name',
                 validate(name) {
-                    return String(name).trim().length > 0
+                    return (/^(?!-)(?!.*?-$)[a-zA-Z0-9-]{1,100}$/i.test(name))
                 },
             }
         ]);
