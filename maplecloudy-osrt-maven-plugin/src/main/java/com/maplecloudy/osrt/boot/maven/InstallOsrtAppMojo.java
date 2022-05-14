@@ -261,7 +261,9 @@ public class InstallOsrtAppMojo extends AbstractMojo {
         //app install
         m = new PostMethod(
             config.getRemote() + "/api/apps/install-app-file" + "?projectId="
-                + projectMap.get("projectId").toString());
+                + projectMap.get("projectId").toString() + "&scopeId="
+                + config.getScope().getId() + "&type=" + config.getScope()
+                .getType());
         m.addRequestHeader(header);
         Part[] parts = {indexFilePart, new FilePart("appFile", target)};
         //StringPart stringPart = new StringPart("projectConfig",
@@ -477,7 +479,9 @@ public class InstallOsrtAppMojo extends AbstractMojo {
     FilePart indexFilePart = new FilePart("index", bps,
         FilePart.DEFAULT_CONTENT_TYPE, StandardCharsets.UTF_8.name());
     getLog().info("start to verify app deploy enabled or not");
-    PostMethod check = new PostMethod(osrtAppSite + "/api/apps/check");
+    PostMethod check = new PostMethod(
+        osrtAppSite + "/api/apps/check?scopeId" + "=" + config.getScope()
+            .getId() + "&type=" + config.getScope().getType());
     check.addRequestHeader(header);
     Part[] indexPart = {indexFilePart};
     MultipartRequestEntity mreIndex = new MultipartRequestEntity(indexPart,

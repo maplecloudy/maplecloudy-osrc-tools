@@ -89,8 +89,8 @@ export async function login(username, password) {
 }
 
 export async function deployBundle(formData, projectId) {
-    const {accessToken, remote} = loadConfig();
-    const url = `${remote}/api/pages/upload?projectId=` + projectId;
+    const {scope,accessToken, remote} = loadConfig();
+    const url = `${remote}/api/pages/upload?projectId=` + projectId+"&type=" + scope.type + "&scopeId=" + scope.id;
     const r = await fetch(url, {
         method: 'POST',
         headers: {
@@ -109,8 +109,8 @@ export async function deployBundle(formData, projectId) {
 }
 
 export async function remoteCheck(appInfo) {
-    const {accessToken, remote} = loadConfig();
-    const url = `${remote}/api/pages/check`;
+    const {scope, accessToken, remote} = loadConfig();
+    const url = `${remote}/api/pages/check` + "?type=" + scope.type + "&scopeId=" + scope.id;
     console.log('url', url, appInfo);
     const response = await fetch(url, {
         method: 'POST',
@@ -156,18 +156,18 @@ export async function getUserInfo() {
 }
 
 export async function getUserOrganizationAccessRole(name) {
-    const {accessToken, remote} = loadConfig();
-    const url = `${remote}/api/organizations/role?name=` + name;
+    const config = loadConfig();
+    const url = `${config.remote}/api/organizations/role?name=` + name;
     const response = await fetch(url, {
         method: 'GET',
         headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${config.accessToken}`,
             'Content-Type': 'application/json',
         }
     });
     if (response.status === 200) {
         const data = await response.json();
-        if (data.accessRole !== 'owner') {
+        if (data.accessRole !== 'OWNER') {
             console.log(chalk.red('You don’t have the access to deploy'));
             process.exit(-1);
         } else {
