@@ -33,7 +33,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,8 +85,8 @@ public abstract class Packager {
 
   private static final byte[] ZIP_FILE_HEADER = new byte[] {'P', 'K', 3, 4};
 
-  private static final long FIND_WARNING_TIMEOUT = TimeUnit.SECONDS
-      .toMillis(10);
+  private static final long FIND_WARNING_TIMEOUT = TimeUnit.SECONDS.toMillis(
+      10);
 
   private static final String[] MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME = {
       "com.maplecloudy.osrt.app.annotation.Task",
@@ -387,8 +394,8 @@ public abstract class Packager {
       List<PodEntry> podEntries = Lists.newArrayList();
       for (MainClass mc : mainClass) {
         Set<String> annotationNames = mc.getAnnotationNames();
-        if (annotationNames
-            .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[2])) {
+        if (annotationNames.contains(
+            MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[2])) {
           runAbleApp.setSubType("spring-boot-application");
           if (podEntries.stream()
               .anyMatch(entry -> entry.getAppPodType() == AppPodType.SERVICE)) {
@@ -402,32 +409,34 @@ public abstract class Packager {
           podEntry.setAppPodType(AppPodType.SERVICE);
           podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
-        } else if (annotationNames
-            .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[1])) {
+        } else if (annotationNames.contains(
+            MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[1])) {
           if (podEntries.stream()
               .anyMatch(entry -> entry.getAppPodType() == AppPodType.SERVICE)) {
             throw new IllegalStateException(
                 SERVICE_CLASS_ATTRIBUTE + " can't " + "have more than one");
           }
           PodEntry podEntry = new PodEntry();
-          podEntry.setCmd("$JAVA_HOME/bin/java $JVM_OPS -jar "
-              + runAbleApp.getAppPackage().getPackageName());
+          podEntry.setCmd(
+              "$JAVA_HOME/bin/java $JVM_OPS -jar " + runAbleApp.getAppPackage()
+                  .getPackageName());
           podEntry.setAppPodType(AppPodType.SERVICE);
           podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
-        } else if (annotationNames
-            .contains(MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[0])) {
+        } else if (annotationNames.contains(
+            MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME[0])) {
           PodEntry podEntry = new PodEntry();
-          podEntry.setCmd("$JAVA_HOME/bin/java $JVM_OPS -jar "
-              + runAbleApp.getAppPackage().getPackageName() + " -osrc.main=" + mc
-              .getName());
+          podEntry.setCmd(
+              "$JAVA_HOME/bin/java $JVM_OPS -jar " + runAbleApp.getAppPackage()
+                  .getPackageName() + " -osrc.main=" + mc.getName());
           podEntry.setAppPodType(AppPodType.TASK);
           podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
         } else {
           PodEntry podEntry = new PodEntry();
-          podEntry.setCmd("$JAVA_HOME/bin/java $JVM_OPS -jar "
-              + runAbleApp.getAppPackage().getPackageName());
+          podEntry.setCmd(
+              "$JAVA_HOME/bin/java $JVM_OPS -jar " + runAbleApp.getAppPackage()
+                  .getPackageName());
           podEntry.setAppPodType(AppPodType.SERVICE);
           podEntry.setEntry(mc.getName());
           podEntries.add(podEntry);
@@ -487,9 +496,9 @@ public abstract class Packager {
   }
 
   protected Set<MainClass> findMainMethod(JarFile source) throws IOException {
-    return MainClassFinder
-        .findMutilMainClass(source, getLayout().getClassesLocation(),
-            MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME);
+    return MainClassFinder.findMutilMainClass(source,
+        getLayout().getClassesLocation(),
+        MAPLECLOUDY_OSRT_APPLICATION_CLASS_NAME);
   }
 
   /**
@@ -497,6 +506,29 @@ public abstract class Packager {
    *
    * @return the file to use to backup the original source
    */
+
+  private boolean hasFinalName(org.apache.maven.model.Plugin plugin) {
+    if (ObjectUtils.isEmpty(plugin)) {
+      return false;
+    }
+    String confStr = plugin.getConfiguration().toString();
+    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder docBuilder = null;
+    try {
+      docBuilder = dbFactory.newDocumentBuilder();
+      Document doc = docBuilder.parse(
+          new ByteArrayInputStream(confStr.getBytes()));
+      Element e = doc.getDocumentElement();
+      Node node = e.getElementsByTagName("finalName").item(0).getFirstChild();
+      if (!org.apache.commons.lang3.ObjectUtils.isEmpty(node)) {
+        return true;
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    return false;
+  }
+
   public final File getBackupFile() {
     if (this.backupFile != null) {
       return this.backupFile;
@@ -506,6 +538,18 @@ public abstract class Packager {
   }
 
   protected final File getSource() {
+    List<org.apache.maven.model.Plugin> buildPlugins = project.getBuildPlugins();
+    for (org.apache.maven.model.Plugin buildPlugin : buildPlugins) {
+      if (org.apache.commons.lang3.StringUtils.equals(buildPlugin.getArtifactId(),"spring-boot-maven-plugin")){
+        System.out.println(buildPlugin.getArtifactId());
+        if (hasFinalName(buildPlugin)) {
+          File file = new File(this.source.getParentFile(),
+              this.project.getBasedir().getName() + "-" + project.getVersion()+"."+project.getPackaging());
+          System.out.println(file.getName());
+          return file;
+        }
+      }
+    }
     if (getBackupFile().exists()) {
       return getBackupFile();
     }
@@ -525,8 +569,8 @@ public abstract class Packager {
     if (this.layoutFactory != null) {
       return this.layoutFactory;
     }
-    List<LayoutFactory> factories = SpringFactoriesLoader
-        .loadFactories(LayoutFactory.class, null);
+    List<LayoutFactory> factories = SpringFactoriesLoader.loadFactories(
+        LayoutFactory.class, null);
     if (factories.isEmpty()) {
       return new DefaultLayoutFactory();
     }
@@ -654,8 +698,8 @@ public abstract class Packager {
     private boolean isTransformable(JarArchiveEntry entry) {
       String name = entry.getName();
       if (name.startsWith("META-INF/")) {
-        return name.equals("META-INF/aop.xml") || name
-            .endsWith(".kotlin_module");
+        return name.equals("META-INF/aop.xml") || name.endsWith(
+            ".kotlin_module");
       }
       return !name.startsWith("BOOT-INF/") && !name.equals("module-info.class");
     }
@@ -691,8 +735,8 @@ public abstract class Packager {
     }
 
     private void addLibrary(Library library) {
-      String location = getLayout()
-          .getLibraryLocation(library.getName(), library.getScope());
+      String location = getLayout().getLibraryLocation(library.getName(),
+          library.getScope());
       if (location != null) {
         String path = location + library.getName();
         Library existing = this.libraries.putIfAbsent(path, library);
@@ -766,6 +810,7 @@ public abstract class Packager {
         "D:\\0_code\\github\\mall\\mall-admin\\target\\mall-admin-1"
             + ".0-SNAPSHOT-osrc-app.jar");
     System.out.println(file.getAbsolutePath());
+
 
   }
 
