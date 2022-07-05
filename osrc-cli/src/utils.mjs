@@ -27,6 +27,9 @@ export function loadConfig() {
     if (!config.accessToken) {
         config.accessToken = process.env.OSRT_APP_TOKEN || undefined;
     }
+    if (!config.scope){
+        config.scope = {}
+    }
     return config;
 }
 
