@@ -36,10 +36,10 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -519,9 +519,15 @@ public abstract class Packager {
       Document doc = docBuilder.parse(
           new ByteArrayInputStream(confStr.getBytes()));
       Element e = doc.getDocumentElement();
-      Node node = e.getElementsByTagName("finalName").item(0).getFirstChild();
-      if (!org.apache.commons.lang3.ObjectUtils.isEmpty(node)) {
-        return true;
+      NodeList list = e.getElementsByTagName("finalName");
+      if (!ObjectUtils.isEmpty(list)) {
+        Node item = list.item(0);
+        if (!ObjectUtils.isEmpty(item)&&item.hasChildNodes()){
+          Node node = item.getFirstChild();
+          if (!org.apache.commons.lang3.ObjectUtils.isEmpty(node)) {
+            return true;
+          }
+        }
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
