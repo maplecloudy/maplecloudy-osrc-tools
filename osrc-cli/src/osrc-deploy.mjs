@@ -98,7 +98,7 @@ commander
 
         const readmeFiles = fse
             .readdirSync(projectRoot)
-            .filter((file) => file.toLocaleLowerCase() == 'readme.md');
+            .filter((file) => file.toLocaleLowerCase() === 'readme.md');
 
         let readmeContent = '';
         if (readmeFiles.length) {
