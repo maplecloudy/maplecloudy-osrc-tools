@@ -3,7 +3,7 @@
 This project is `OSRC deployment` toolkit. 
 
 Frontend website(static site) deployment tool [osrc-cli](osrc-cli/README.md)    
-Back-end app deployment tool [maplecloudy-osrc-maven-plugin](maplecloudy-osrt-maven-plugin/README.md)   
+Back-end app deployment tool [maplecloudy-osrc-maven-plugin](maplecloudy-osrc-maven-plugin/README.md)   
 
 
 ### [osrc-cli](osrc-cli/README.md)

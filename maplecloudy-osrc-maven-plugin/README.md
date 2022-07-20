@@ -7,8 +7,8 @@ The App can have multiple main methods that execute, and we divide these main me
 
 We introduced **osrc annotations** to distinguish between the two types of main. Just add the annotation to the main-class.
 ```
-service: @com.maplecloudy.osrt.app.annotation.Service 
-task: @com.maplecloudy.osrt.app.annotation.Task
+service: @com.maplecloudy.osrc.app.annotation.Service 
+task: @com.maplecloudy.osrc.app.annotation.Task
 ```
 We classified Spring's default startup class as a Service type. 
 
@@ -34,9 +34,9 @@ Note that osrc annotations are not mandatory.
 
 
 ## generate xxx.jar
-* add osrt annotation  
-service: `@com.maplecloudy.osrt.app.annotation.Service`  
-task: `@com.maplecloudy.osrt.app.annotation.Task`
+* add osrc annotation  
+service: `@com.maplecloudy.osrc.app.annotation.Service`  
+task: `@com.maplecloudy.osrc.app.annotation.Task`
 
 * default config 
 
@@ -47,14 +47,14 @@ Only one main method is allowed in the code, otherwise the compilation will repo
 `Unable to find a single main class from the following candidates xxx`
 
 * add osrc annotation  
-service: `@com.maplecloudy.osrt.app.annotation.Service`
+service: `@com.maplecloudy.osrc.app.annotation.Service`
 
 * default  config
   
 
-compile result: `xxx-osrc-app.war`
+compile result: `xxx-osrc-app.jar`
 
-## execute `mvn clean install -Dinstall.osrt.skip`
+## execute `mvn clean install -Dinstall.osrc.skip`
 The code compiles normally, but is not deployed to OSRC. 
 
 ## execute `mvn clean install`

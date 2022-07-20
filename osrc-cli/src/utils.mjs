@@ -25,7 +25,7 @@ export function loadConfig() {
         config.remote = 'https://www.osrc.com';
     }
     if (!config.accessToken) {
-        config.accessToken = process.env.OSRT_APP_TOKEN || undefined;
+        config.accessToken = process.env.OSRC_APP_TOKEN || undefined;
     }
     if (!config.scope){
         config.scope = {}

@@ -17,7 +17,7 @@
 
     <packaging>pom</packaging>
     <name>maplecloudy-osrc-tools</name>
-    <description>Mapleccloudy OSRC</description>
+    <description>MapleCloudy OSRC</description>
 
     <modules>
         <module>maplecloudy-osrc-loader</module>
