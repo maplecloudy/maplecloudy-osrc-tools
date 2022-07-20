@@ -4,21 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.maplecloudy.osrt</groupId>
-        <artifactId>maplecloudy-osrt-tools</artifactId>
+        <groupId>com.maplecloudy.osrc</groupId>
+        <artifactId>maplecloudy-osrc-tools</artifactId>
         <version>0.0.1-beta</version>
     </parent>
-    <artifactId>maplecloudy-osrt-loader-tools</artifactId>
+    <artifactId>maplecloudy-osrc-loader-tools</artifactId>
 
     <packaging>jar</packaging>
-    <description>Maplecloudy Osrt Loader tools</description>
+    <description>Maplecloudy Osrc Loader tools</description>
     <properties>
         <main.basedir>${basedir}/../../..</main.basedir>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.maplecloudy.osrt</groupId>
-            <artifactId>maplecloudy-osrt-model-public</artifactId>
+            <groupId>com.maplecloudy.osrc</groupId>
+            <artifactId>maplecloudy-osrc-model-public</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -58,8 +58,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.maplecloudy.osrt</groupId>
-                                    <artifactId>maplecloudy-osrt-loader
+                                    <groupId>com.maplecloudy.osrc</groupId>
+                                    <artifactId>maplecloudy-osrc-loader
                                     </artifactId>
                                     <version>${project.version}</version>
                                     <destFileName>maplecloudy-boot-loader.jar
@@ -83,13 +83,13 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.maplecloudy.osrt</groupId>
+                                    <groupId>com.maplecloudy.osrc</groupId>
                                     <artifactId>
-                                        maplecloudy-osrt-jarmode-layertools
+                                        maplecloudy-osrc-jarmode-layertools
                                     </artifactId>
                                     <version>${project.version}</version>
                                     <destFileName>
-                                        maplecloudy-osrt-jarmode-layertools.jar
+                                        maplecloudy-osrc-jarmode-layertools.jar
                                     </destFileName>
                                 </artifactItem>
                             </artifactItems>

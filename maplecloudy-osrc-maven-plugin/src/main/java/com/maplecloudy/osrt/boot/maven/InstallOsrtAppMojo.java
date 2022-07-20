@@ -68,7 +68,7 @@ import java.util.jar.JarFile;
  * Installs the project's main artifact, and any other artifacts attached by
  * other plugins in the lifecycle, to osrt app center.
  */
-@Mojo(name = "install-osrt-app", defaultPhase = LifecyclePhase.INSTALL, requiresProject = true, threadSafe = true)
+@Mojo(name = "install-osrc-app", defaultPhase = LifecyclePhase.INSTALL, requiresProject = true, threadSafe = true)
 @Execute(phase = LifecyclePhase.INSTALL)
 public class InstallOsrtAppMojo extends AbstractMojo {
 

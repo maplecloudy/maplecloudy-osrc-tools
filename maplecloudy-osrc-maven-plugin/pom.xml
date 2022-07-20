@@ -4,26 +4,26 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.maplecloudy.osrt</groupId>
-        <artifactId>maplecloudy-osrt-tools</artifactId>
+        <groupId>com.maplecloudy.osrc</groupId>
+        <artifactId>maplecloudy-osrc-tools</artifactId>
         <version>0.0.1-beta</version>
     </parent>
-    <artifactId>maplecloudy-osrt-maven-plugin</artifactId>
+    <artifactId>maplecloudy-osrc-maven-plugin</artifactId>
 
     <packaging>maven-plugin</packaging>
-    <description>Maplecloudy Osrt Maven Plugin</description>
+    <description>Maplecloudy Osrc Maven Plugin</description>
     <properties>
         <main.basedir>${basedir}/../../..</main.basedir>
         <maven.version>3.3.9</maven.version>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.maplecloudy.osrt</groupId>
-            <artifactId>maplecloudy-osrt-loader-tools</artifactId>
+            <groupId>com.maplecloudy.osrc</groupId>
+            <artifactId>maplecloudy-osrc-loader-tools</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.maplecloudy.osrt</groupId>
-            <artifactId>maplecloudy-osrt-model-public</artifactId>
+            <groupId>com.maplecloudy.osrc</groupId>
+            <artifactId>maplecloudy-osrc-model-public</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -91,7 +91,7 @@
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.6.0</version>
                 <configuration>
-                    <goalPrefix>maplecloudy-osrt</goalPrefix>
+                    <goalPrefix>maplecloudy-osrc</goalPrefix>
                     <skipErrorNoDescriptorsFound>true
                     </skipErrorNoDescriptorsFound>
                 </configuration>

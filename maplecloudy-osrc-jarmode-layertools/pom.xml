@@ -4,21 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.maplecloudy.osrt</groupId>
-        <artifactId>maplecloudy-osrt-tools</artifactId>
+        <groupId>com.maplecloudy.osrc</groupId>
+        <artifactId>maplecloudy-osrc-tools</artifactId>
         <version>0.0.1-beta</version>
     </parent>
-    <artifactId>maplecloudy-osrt-jarmode-layertools</artifactId>
+    <artifactId>maplecloudy-osrc-jarmode-layertools</artifactId>
 
 
-    <description>Maplecloudy Osrt Jarmode Layertools</description>
+    <description>Maplecloudy Osrc Jarmode Layertools</description>
     <properties>
         <main.basedir>${basedir}/../../..</main.basedir>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.maplecloudy.osrt</groupId>
-            <artifactId>maplecloudy-osrt-loader</artifactId>
+            <groupId>com.maplecloudy.osrc</groupId>
+            <artifactId>maplecloudy-osrc-loader</artifactId>
         </dependency>
         <!-- Compile -->
         <dependency>
@@ -69,7 +69,7 @@
                                                        replace="${project.version}"
                                                        flags="g" byline="true">
                                             <fileset
-                                                    dir="${project.build.directory}/local-repo/com/maplecloudy/osrt/maplecloudy-osrt-jarmode-layertools/"
+                                                    dir="${project.build.directory}/local-repo/com/maplecloudy/osrc/maplecloudy-osrc-jarmode-layertools/"
                                                     includes="**/*.pom"/>
                                         </replaceregexp>
                                     </target>

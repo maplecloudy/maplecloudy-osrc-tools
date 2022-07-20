@@ -10,21 +10,21 @@
         <version>2.3.9.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.maplecloudy.osrt</groupId>
-    <artifactId>maplecloudy-osrt-tools</artifactId>
+    <groupId>com.maplecloudy.osrc</groupId>
+    <artifactId>maplecloudy-osrc-tools</artifactId>
     <version>0.0.1-beta</version>
 
 
     <packaging>pom</packaging>
-    <name>maplecloudy-osrt-tools</name>
-    <description>Mapleccloudy OSRT</description>
+    <name>maplecloudy-osrc-tools</name>
+    <description>Mapleccloudy OSRC</description>
 
     <modules>
-        <module>maplecloudy-osrt-loader</module>
-        <module>maplecloudy-osrt-jarmode-layertools</module>
-        <module>maplecloudy-osrt-loader-tools</module>
-        <module>maplecloudy-osrt-maven-plugin</module>
-        <module>maplecloudy-osrt-model-public</module>
+        <module>maplecloudy-osrc-loader</module>
+        <module>maplecloudy-osrc-jarmode-layertools</module>
+        <module>maplecloudy-osrc-loader-tools</module>
+        <module>maplecloudy-osrc-maven-plugin</module>
+        <module>maplecloudy-osrc-model-public</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,18 +37,18 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.maplecloudy.osrt</groupId>
-                <artifactId>maplecloudy-osrt-loader</artifactId>
+                <groupId>com.maplecloudy.osrc</groupId>
+                <artifactId>maplecloudy-osrc-loader</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.maplecloudy.osrt</groupId>
-                <artifactId>maplecloudy-osrt-loader-tools</artifactId>
+                <groupId>com.maplecloudy.osrc</groupId>
+                <artifactId>maplecloudy-osrc-loader-tools</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.maplecloudy.osrt</groupId>
-                <artifactId>maplecloudy-osrt-model-public</artifactId>
+                <groupId>com.maplecloudy.osrc</groupId>
+                <artifactId>maplecloudy-osrc-model-public</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

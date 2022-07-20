@@ -1,30 +1,31 @@
-# maplecloudy-osrt-maven-plugin
+# maplecloudy-osrc-maven-plugin
 ## introduction
 The App can have multiple main methods that execute, and we divide these main methods into two types: **service**和**task**
 * service:
 
 * task:  
 
-We introduced **osrt annotations** to distinguish between the two types of main. Just add the annotation to the main-class.
+We introduced **osrc annotations** to distinguish between the two types of main. Just add the annotation to the main-class.
 ```
 service: @com.maplecloudy.osrt.app.annotation.Service 
 task: @com.maplecloudy.osrt.app.annotation.Task
 ```
 We classified Spring's default startup class as a Service type. 
 
-Note that osrt annotations are not mandatory.
+Note that osrc annotations are not mandatory.
 
 ## pom setting
   ```
   <plugin>
-          <groupId>com.maplecloudy.osrt</groupId>
-          <artifactId>maplecloudy-osrt-maven-plugin</artifactId>
+          <groupId>com.maplecloudy.osrc</groupId>
+          <artifactId>maplecloudy-osrc-maven-plugin</artifactId>
           <version>1.0.0-SNAPSHOT</version>
           <executions>
               <execution>
                   <goals>
                      <goal>repackage</goal>
-                     <goal>install-osrt-app</goal>
+                     <!-- enable upload app -->
+                     <goal>install-osrc-app</goal>
                      </goals>
               </execution>
           </executions>
@@ -45,7 +46,7 @@ compile result: `xxx-osrc-app.jar`
 Only one main method is allowed in the code, otherwise the compilation will report an error:
 `Unable to find a single main class from the following candidates xxx`
 
-* add osrt annotation  
+* add osrc annotation  
 service: `@com.maplecloudy.osrt.app.annotation.Service`
 
 * default  config

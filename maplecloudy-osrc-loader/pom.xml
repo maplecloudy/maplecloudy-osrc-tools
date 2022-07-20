@@ -4,14 +4,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.maplecloudy.osrt</groupId>
-		<artifactId>maplecloudy-osrt-tools</artifactId>
+		<groupId>com.maplecloudy.osrc</groupId>
+		<artifactId>maplecloudy-osrc-tools</artifactId>
 		<version>0.0.1-beta</version>
 	</parent>
-	<artifactId>maplecloudy-osrt-loader</artifactId>
+	<artifactId>maplecloudy-osrc-loader</artifactId>
 
 
-	<description>Maplecloudy Osrt loader</description>
+	<description>Maplecloudy Osrc loader</description>
 	<properties>
 		<main.basedir>${basedir}/../../..</main.basedir>
 	</properties>
@@ -56,7 +56,7 @@
 										<replaceregexp match="\$\{revision\}"
 											replace="${project.version}" flags="g" byline="true">
 											<fileset
-												dir="${project.build.directory}/local-repo/com/maplecloudy/osrt/maplecloudy-osrt-loader/"
+												dir="${project.build.directory}/local-repo/com/maplecloudy/osrc/maplecloudy-osrc-loader/"
 												includes="**/*.pom" />
 										</replaceregexp>
 									</target>

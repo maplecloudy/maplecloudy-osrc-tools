@@ -1,26 +1,29 @@
-# maplecloudy-osrt-tools
+# maplecloudy-osrc-tools
 
-This project is an `OSRC deployment` toolkit
+This project is `OSRC deployment` toolkit. 
 
-Currently we have developed front-end app deployment tool 
-[osrc-cli](https://github.com/maplecloudy/maplecloudy-osrt-tools/tree/master/osrc-cli#readme) and back-end app deployment tool [maplecloudy-osrt-maven-plugin](https://github.com/maplecloudy/maplecloudy-osrt-tools/tree/master/maplecloudy-osrt-maven-plugin#readme)
+Frontend website(static site) deployment tool [osrc-cli](osrc-cli/README.md)    
+Back-end app deployment tool [maplecloudy-osrc-maven-plugin](maplecloudy-osrt-maven-plugin/README.md)   
 
 
-[osrc-cli](https://github.com/maplecloudy/maplecloudy-osrt-tools/tree/master/osrc-cli#readme)
+### [osrc-cli](osrc-cli/README.md)
+
 ```
 npm i -g osrc-cli
 ```
-[maplecloudy-osrt-maven-plugin](https://github.com/maplecloudy/maplecloudy-osrt-tools/tree/master/maplecloudy-osrt-maven-plugin#readme)
+
+### [maplecloudy-osrc-maven-plugin](maplecloudy-osrc-maven-plugin/README.md)
 ```
   <plugin>
-          <groupId>com.maplecloudy.osrt</groupId>
-          <artifactId>maplecloudy-osrt-maven-plugin</artifactId>
-          <version>1.0.0-SNAPSHOT</version>
+          <groupId>com.maplecloudy.osrc</groupId>
+          <artifactId>maplecloudy-osrc-maven-plugin</artifactId>
+          <version>0.1.0</version>
           <executions>
               <execution>
                   <goals>
                      <goal>repackage</goal>
-                     <goal>install-osrt-app</goal>
+                     <!-- enable upload app -->
+                     <goal>install-osrc-app</goal>
                      </goals>
               </execution>
           </executions>
