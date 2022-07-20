@@ -1,6 +1,6 @@
 {
   "name": "osrc-cli",
-  "version": "0.0.1-beat",
+  "version": "0.0.4-beta",
   "description": "osrc publish tools for frontend project",
   "bin": {
     "osrc": "src/osrc.mjs"
@@ -8,6 +8,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maplecloudy/maplecloudy-osrt-tools.git"
+  },
+  "keywords": [
+    "markdown",
+    "html",
+    "website",
+    "deploy"
+  ],
+  "homepage": "https://www.osrc.com/",
   "dependencies": {
     "cli-spinners": "^2.6.1",
     "commander": "^8.3.0",
