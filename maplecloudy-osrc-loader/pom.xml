@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.maplecloudy.osrc</groupId>
 		<artifactId>maplecloudy-osrc-tools</artifactId>
-		<version>0.0.1-beta</version>
+		<version>0.0.2-beta</version>
 	</parent>
 	<artifactId>maplecloudy-osrc-loader</artifactId>
 

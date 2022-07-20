@@ -5,7 +5,7 @@
     <parent>
         <artifactId>maplecloudy-osrc-tools</artifactId>
         <groupId>com.maplecloudy.osrc</groupId>
-        <version>0.0.1-beta</version>
+        <version>0.0.2-beta</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>maplecloudy-osrc-model-public</artifactId>
