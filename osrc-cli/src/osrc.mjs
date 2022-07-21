@@ -21,7 +21,7 @@ const packageJson = JSON.parse(
     commander
         .option(
             "-r,--remote <remote>",
-            "config osrc deploy target, this is for developer of osrc,defalut is https://www.osrc.com,"
+            "config osrc deploy target, this is for developer of osrc,default is https://www.osrc.com,"
         )
         .action(function (args) {
             if (args.remote) {

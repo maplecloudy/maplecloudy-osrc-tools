@@ -1,9 +1,8 @@
 # maplecloudy-osrc-maven-plugin
-## introduction
-The App can have multiple main methods that execute, and we divide these main methods into two types: **service**和**task**
-* service:
 
-* task:  
+## Introduce      
+
+The App can have multiple main methods that execute, and we divide these main methods into two types: **service**和**task**
 
 We introduced **osrc annotations** to distinguish between the two types of main. Just add the annotation to the main-class.
 ```
@@ -14,12 +13,14 @@ We classified Spring's default startup class as a Service type.
 
 Note that osrc annotations are not mandatory.
 
-## pom setting
+## Quickly Start   
+
+### Config pom setting
   ```
   <plugin>
           <groupId>com.maplecloudy.osrc</groupId>
           <artifactId>maplecloudy-osrc-maven-plugin</artifactId>
-          <version>1.0.0-SNAPSHOT</version>
+          <version>${lastest-version}</version>
           <executions>
               <execution>
                   <goals>
@@ -33,34 +34,27 @@ Note that osrc annotations are not mandatory.
   ```
 
 
-## generate xxx.jar
-* add osrc annotation  
+### Generate xxx.jar   
+
+* use osrc annotation endpoint (optional) 
+
 service: `@com.maplecloudy.osrc.app.annotation.Service`  
 task: `@com.maplecloudy.osrc.app.annotation.Task`
 
-* default config 
+* use `@SpringBootApplication` default endpoint 
 
-compile result: `xxx-osrc-app.jar`
+`org.springframework.boot.autoconfigure.SpringBootApplication`
 
-## generate xxx.war
-Only one main method is allowed in the code, otherwise the compilation will report an error:
-`Unable to find a single main class from the following candidates xxx`
 
-* add osrc annotation  
-service: `@com.maplecloudy.osrc.app.annotation.Service`
-
-* default  config
-  
-
-compile result: `xxx-osrc-app.jar`
-
-## execute `mvn clean install -Dinstall.osrc.skip`
+### Execute `mvn clean install -Dinstall.osrc.skip`
 The code compiles normally, but is not deployed to OSRC. 
 
-## execute `mvn clean install`
-if the token stored locally expired,need to input username and password to got the token and store.
+### Execute `mvn clean install`   
+This command will deploy app to OSRC.    
+If you don't have an osrc account before, you need to register in [OSRC](https://www.osrc.com) for one.   
+If the token stored locally expired, need to input username and password to get the token and store.   
 
-## the login to osrc config file store as
+### The login to osrc config file store as
 
 location: `~/.osrc`
 the config info store as:

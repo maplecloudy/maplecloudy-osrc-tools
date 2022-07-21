@@ -12,7 +12,7 @@
     </parent>
     <groupId>com.maplecloudy.osrc</groupId>
     <artifactId>maplecloudy-osrc-tools</artifactId>
-    <version>0.0.2-beta</version>
+    <version>1.0.2</version>
 
 
     <packaging>pom</packaging>
@@ -202,12 +202,12 @@
         <snapshotRepository>
             <id>osrc-center</id>
             <name>maven-public</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>osrc-center</id>
             <name>maven-public</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
