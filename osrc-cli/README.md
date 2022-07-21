@@ -1,10 +1,18 @@
-# osrc-cli
-one cli tools for users deploy SPA to osrc Pages.
-## for users deploy SPA to osrc Pages
+# OSRC CLI   
+
+The cli tool for users deploy website(static site) to [OSRC PAGES](https://www.osrc.com/explore/pages).  
+
+## Quickly Start   
+
+1. Install Cli via `npm` or `yarn`
+
 ```bash
 npm i -g osrc-cli
+# or
+yarn global add osrc-cli
 ```
-then you can get the cli 'osrc', just use it like:
+then you can get the cli `osrc`, just use it like:
+
 ```bash
 osrc
 Usage: osrc [command]
@@ -25,47 +33,60 @@ Commands:
 *osrc-cli support "node": "^12.20.0 || ^14.13.1 || >=16.0.0"*
 - workaround for other node version: 
 *build the SPA project with your wanted node version, the switch to others node version for use osrc cli!*
-## the dev tech
 
-usr 'nodejs esmodule' for the osrc command tools
+2. Build Project Static Files  
 
-for debug
-`DEBUG=* nodejs scripts/osr-cli/osrc-cli.mjs login`
-
-for dev use 'npm link' get the osrc cmd
-```bash
-npm link
-osrc
-```
-## specific the remote osrc addr for deploy
-this is for devleper, the default is https://www.osrc.com/, you can ignore this cmd!
-```bash
-osrc -r https://www.osrc.com/
-osrc --remote https://www.osrc.com/
-```
-
-## login
+3. Osrc Login  
 
 ```bash
 osrc login
 # input username and password, got the token and store
 ``` 
 
-## deploy
-the deploy dir defalut as 'dist', if your project build output as 'dist',you can ignore this para!
+4. Osrc Deploy 
+
+The deployment default static file dir is `dist`, if your project's static build output as `dist`, you can ignore the `dist` para!
+
 ```bash
-# after the build finishedd
-# specific the deploy dir
+# after 2.Build Project Static Files
+# custom the deploy dir or use default `dist`
+osrc deploy 
 osrc deploy -d dist
 osrc deploy --dirname dist
 ```
 
-##  print the osrc config info of current
+5. Success! 
+
+You can visit the osrc.com workbench to see the project you just deployed now!   
+
+## How to Use   
+
+### Config Info 
+
 ```bash
+# print the osrc config info of current
 osrc info
 ```
 
-## the login to osrc config file store as
+### login
+
+```bash
+osrc login
+# input username and password, got the token and store
+``` 
+
+### deploy
+The deployment default static dir is `dist`, if your project's static build output as `dist`, you can ignore this para! 
+
+```bash
+# after the build finished
+# custom the deploy dir or use default `dist`
+osrc deploy 
+osrc deploy -d dist
+osrc deploy --dirname dist
+```
+
+### The login to osrc config file store as
 
 location: `~/.osrc`
 the config info store as:
@@ -76,4 +97,26 @@ the config info store as:
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MzkwNzU3NjEsInVzZXJfbmFtZSI6Inl1YW5ibyIsImF1dGhvcml0aWVzIjpbInVzZXIiXSwianRpIjoiNVZNNVNSRzNoanRaX19YUVlFMzllQ3RRREowIiwiY2xpZW50X2lkIjoibWFwbGVjbG91ZHkiLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXX0.jMJI8wyZhr-OEBvFdtyHPTW9bxJZjxFehSpEvqmn_Zi3kyIkvoFcwtToFz7w6M9q4ECFBuGXuo8YlLehILmfcQXM-cOP4tzpo9as8_1Jot4JD5FXQqbd3pRTEcxUKhK4QgJ7p8JKsEbjaHQDzN_9RkxjkLEW-yDpYks0DCk80Rdlo__UvQkgLaXMFAruULsxvYxTn7YvkLDG_xs4MLDv0sO9Y73Hotl1z_qjUm-yOjOus4CkjGh9XYYyL9ZTeuQ1YQFeWY-BYjT_tSjCR85SiRZZsf5Ozc9FiJCo2yX9b7JjaTlrRa_AHIOmZnXRVLUoSWvKew5hzL0M2n5aqipzsQ",
   "tokenType": "bearer"
 }
+```
+
+### custom osrc server address
+this is for developer, the default is https://www.osrc.com/, you can ignore this cmd!
+
+```bash
+osrc -r https://www.osrc.com/
+osrc --remote https://www.osrc.com/
+```
+
+## Dev Advanced
+
+usr 'nodejs esmodule' for the osrc command tools
+
+For Debug
+`DEBUG=* nodejs scripts/osr-cli/osrc-cli.mjs login`
+
+For dev use 'npm link' get the osrc cmd
+```bash
+yarn   
+npm link
+osrc
 ```
