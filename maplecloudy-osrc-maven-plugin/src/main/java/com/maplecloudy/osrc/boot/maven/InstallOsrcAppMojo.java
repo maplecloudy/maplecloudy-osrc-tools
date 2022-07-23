@@ -319,7 +319,7 @@ public class InstallOsrcAppMojo extends AbstractMojo {
     //1.初始化.osrc文件
     String osrcAppSite = null;
     if (!osrcFile.exists()) {
-      osrcAppSite = "https://www.maplecloudy.com";
+      osrcAppSite = "https://www.osrc.com";
       boolean initLoginInfoSuccess = initLoginInfoSuccess(config, osrcAppSite,
           header, sc);
       if (!initLoginInfoSuccess) {
@@ -333,7 +333,7 @@ public class InstallOsrcAppMojo extends AbstractMojo {
       //2. 校验.osrc文件内容
       Config osrcConfig = om.readValue(osrcFile, Config.class);
       if (ObjectUtils.isEmpty(osrcConfig.getRemote())) {
-        osrcAppSite = "https://www.maplecloudy.com";
+        osrcAppSite = "https://www.osrc.com";
         osrcConfig.setRemote(osrcAppSite);
       }
       //校验 login info
