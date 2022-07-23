@@ -505,10 +505,14 @@ public abstract class Packager {
     if (ObjectUtils.isEmpty(plugin)) {
       return false;
     }
-    String confStr = plugin.getConfiguration().toString();
-    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder docBuilder = null;
     try {
+      Object configuration = plugin.getConfiguration();
+      if (ObjectUtils.isEmpty(configuration)) {
+        return false;
+      }
+      String confStr = configuration.toString();
+      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = null;
       docBuilder = dbFactory.newDocumentBuilder();
       Document doc = docBuilder.parse(
           new ByteArrayInputStream(confStr.getBytes()));
