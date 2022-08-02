@@ -17,7 +17,7 @@ npm i -g osrc-cli
   <plugin>
           <groupId>com.maplecloudy.osrc</groupId>
           <artifactId>maplecloudy-osrc-maven-plugin</artifactId>
-          <version>0.1.0</version>
+          <version>${lastest-version}</version>
           <executions>
               <execution>
                   <goals>
