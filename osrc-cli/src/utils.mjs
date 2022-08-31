@@ -58,7 +58,7 @@ export function collectInfo(packageJson) {
         topics: keywords,
         // repository,
         description,
-        main,
+        // main,
     };
     const entries = Object.entries(infos).filter(([n, v]) => !!v);
     return Object.fromEntries(entries);
