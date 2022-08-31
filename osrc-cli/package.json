@@ -1,6 +1,6 @@
 {
   "name": "osrc-cli",
-  "version": "0.0.4-beta",
+  "version": "0.0.5-beta",
   "description": "osrc publish tools for frontend project",
   "bin": {
     "osrc": "src/osrc.mjs"
