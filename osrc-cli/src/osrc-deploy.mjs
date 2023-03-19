@@ -123,9 +123,7 @@ commander
         process.chdir(dirname);
         console.log(chalk.green(`go to ${dirname} dir`));
 
-        const tempFilepath = `${appInfo.name}_${
-            appInfo.version
-        }_${Date.now()}.tar.gz`;
+        const tempFilepath = `osrc-pages_${Date.now()}.tar.gz`;
         debug('bundleName', tempFilepath);
 
         const fullFilePath = path.join(projectRoot, tempFilepath);
@@ -161,8 +159,8 @@ commander
         debug('formData', [...formData.keys()]);
 
         console.log(chalk.green(`start deploy...`));
-        await deployBundle(formData, projectsBundleInfo.projectId);
-        console.log(chalk.green(`deploy sucess!`));
+        await deployBundle(formData, projectsBundleInfo.projectId,appInfo);
+        
         fse.unlinkSync(fullFilePath);
     })
     .parse(process.argv);

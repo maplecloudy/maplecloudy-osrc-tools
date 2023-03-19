@@ -91,18 +91,22 @@ export async function login(username, password) {
     }
 }
 
-export async function deployBundle(formData, projectId) {
-    const {scope,accessToken, remote} = loadConfig();
+export async function deployBundle(formData, projectId,appInfo) {
+    const {scope,accessToken, remote,username} = loadConfig();
     const url = `${remote}/api/pages/upload?projectId=` + projectId+"&type=" + scope.type + "&scopeId=" + scope.id;
-    const r = await fetch(url, {
+    const resp = await fetch(url, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
         body: formData,
     });
-    if (r.status === 200) {
-        const data = await r.json();
+    if (resp.status === 200) {
+        const data = await resp.json();
+        console.log(formData);
+        console.log(chalk.green('deploy success, this pages at OSRC addr:'));
+        
+        console.log(chalk.blue(chalk.underline("https://os.osrc.com/"+username+"/projects/"+projectId+"?version="+appInfo.version+"&tab=pages&page="+data.pageId)));
         return data;
     } else {
         const data = await r.text();
