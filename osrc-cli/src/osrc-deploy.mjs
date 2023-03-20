@@ -80,7 +80,7 @@ commander
                 }
             ]);
 
-            switch (choose) {
+            switch (choose.trim().toLowerCase()) {
                 case 'y':
                     break;
                 case 'n':
@@ -113,10 +113,11 @@ commander
         }
 
         const r = await remoteCheck(appInfo);
-        console.log('remoteCheck', r);
 
         const _dirname = cmd.dirname || 'dist';
-        console.log(chalk.green(_dirname) + 'will be deploy to osrc site');
+        console.log(chalk.yellow(_dirname) + chalk.blue(' directory will be' +
+            ' deploy to' +
+            ' osrc site!'));
 
         const dirname = _dirname;
         debug('dirname', dirname);
@@ -165,6 +166,34 @@ commander
     })
     .parse(process.argv);
 
+async function getExistingProjectInfo() {
+    const {name} = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'name',
+            validate(name) {
+                return String(name).trim().length > 0
+            },
+        }
+    ]);
+    const projects = await checkProjectInfoByName(name);
+    return projects;
+}
+
+async function addNewProjects(appInfo) {
+    const {name} = await inquirer.prompt([
+        {
+            type: 'input',
+            newName: 'name',
+            validate(name) {
+                return (/^(?!-)(?!.*?-$)[a-zA-Z0-9-]{1,100}$/i.test(name))
+            },
+        }
+    ]);
+    const projects = await addPagesProject(name, appInfo.bundleStr)
+    return projects;
+}
+
 async function bundleProject(appInfo, projectsBundleInfo) {
     console.log("Link to existing project? [Y/n]")
     const {choose} = await inquirer.prompt([
@@ -177,40 +206,23 @@ async function bundleProject(appInfo, projectsBundleInfo) {
         }
     ]);
 
-    if (choose === 'y') {
-        console.log("What’s the name of your existing project?")
-        const {name} = await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'name',
-                validate(name) {
-                    return String(name).trim().length > 0
-                },
-            }
-        ]);
-        const projects = await checkProjectInfoByName(name);
-        console.log('check projects info: ' + projects.id)
-        projectsBundleInfo.projectId = projects.id
-        await addProjectsPageBundleRelations(projects.id, appInfo.bundleStr)
-    } else if (choose === 'n') {
-        console.log("What’s your project’s name?")
-        console.log("(project name can only consist of up to 100 "
-            + "aiphanumeric lowercase characters.Hyphens can be used in "
-            + "between the name,but never at the start or end.)")
-        const {name} = await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'name',
-                validate(name) {
-                    return (/^(?!-)(?!.*?-$)[a-zA-Z0-9-]{1,100}$/i.test(name))
-                },
-            }
-        ]);
-        const projects = await addPagesProject(name, appInfo.bundleStr)
-        console.log('add projects info: ' + projects.id)
-        projectsBundleInfo.projectId = projects.id
-    } else {
-        console.log('deploy canceled!')
-        process.exit(-1)
+    switch (choose.trim().toLowerCase()) {
+        case 'y':
+            console.log("What’s the name of your existing project?")
+            const projects = await getExistingProjectInfo();
+            console.log('check projects info: ' + projects.id)
+            projectsBundleInfo.projectId = projects.id
+            await addProjectsPageBundleRelations(projects.id, appInfo.bundleStr)
+        case 'n':
+            console.log("What’s your project’s name?")
+            console.log("(project name can only consist of up to 100 "
+                + "aiphanumeric lowercase characters.Hyphens can be used in "
+                + "between the name,but never at the start or end.)")
+            const newProjects = await addNewProjects(appInfo);
+            console.log('add projects info: ' + newProjects.id)
+            projectsBundleInfo.projectId = newProjects.id
+        default:
+            console.log('deploy canceled!')
+            process.exit(-1)
     }
 }

@@ -12,7 +12,6 @@ const debug = Debug('osrc:login');
 
 commander
     .action(async function () {
-        const config = loadConfig();
         debug('login.action');
         const answers = await inquirer.prompt([
             {

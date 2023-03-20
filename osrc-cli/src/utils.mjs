@@ -80,7 +80,7 @@ export async function login(username, password) {
     if (response.status === 200) {
         const data = await response.json();
         debug('login', data);
-        config.username = username;
+        config.username = username.trim();
         config.accessToken = data.accessToken;
         config.tokenType = data.tokenType;
         saveConfig(config);
@@ -103,10 +103,8 @@ export async function deployBundle(formData, projectId,appInfo) {
     });
     if (resp.status === 200) {
         const data = await resp.json();
-        console.log(formData);
         console.log(chalk.green('deploy success, this pages at OSRC addr:'));
-        
-        console.log(chalk.blue(chalk.underline("https://os.osrc.com/"+username+"/projects/"+projectId+"?version="+appInfo.version+"&tab=pages&page="+data.pageId)));
+        console.log(chalk.blue(data.pageUrl));
         return data;
     } else {
         const data = await r.text();
@@ -118,7 +116,6 @@ export async function deployBundle(formData, projectId,appInfo) {
 export async function remoteCheck(appInfo) {
     const {scope, accessToken, remote} = loadConfig();
     const url = `${remote}/api/pages/check` + "?type=" + scope.type + "&scopeId=" + scope.id;
-    console.log('url', url, appInfo);
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -129,7 +126,8 @@ export async function remoteCheck(appInfo) {
     });
     if (response.status === 200) {
         const data = await response.json();
-        console.log('remoteCheck', data);
+        console.log(chalk.green('remoteCheck......'));
+        console.log(chalk.green(data.msg));
         return data;
     }
     if (response.status === 401) {
